@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">HealthWatch</string>
+    <string name="title_home">Home</string>
+    <string name="title_bluetooth">Bluetooth</string>
+    <string name="title_settings">Settings</string>
+    <string name="bluetooth_toggle">Activate/Deactive Bluetooth</string>
+    <string name="connected_devices">Connected devices</string>
+    <string name="search_devices">Search</string>
+    <string name="found_devices">Found devices</string>
+</resources>
