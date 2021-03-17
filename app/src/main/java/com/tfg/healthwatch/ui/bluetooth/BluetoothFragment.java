@@ -35,6 +35,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.tfg.healthwatch.BLEService;
 import com.tfg.healthwatch.BluetoothListAdapter;
+import com.tfg.healthwatch.DashboardActivity;
 import com.tfg.healthwatch.R;
 
 import java.util.ArrayList;
@@ -56,14 +57,22 @@ public class BluetoothFragment extends Fragment{
         bluetoothViewModel = new ViewModelProvider(this).get(BluetoothViewModel.class);
         root = inflater.inflate(R.layout.fragment_bluetooth, container, false);
 
-        bleService = new BLEService("DD:80:0D:1E:D0:53",getActivity(),root);
+        bleService = DashboardActivity.getBleService();
+        //bleService = new BLEService("DD:80:0D:1E:D0:53",getActivity(),root);
 
         if(bleService.checkBluetooth()){
             Switch bluetooth_switch = (Switch) root.findViewById(R.id.bluetooth_switch);
 
             if(mBluetoothAdapter.isEnabled()){
                 bluetooth_switch.setChecked(true);
-                bleService.getConnectedDevices();
+
+                ListView connectedDevicesList = (ListView) root.findViewById(R.id.connected_devices_list);
+                ArrayList<BluetoothObject> devicesArray = bleService.getConnectedDevices();
+
+                BluetoothListAdapter bAdapter = new BluetoothListAdapter(
+                        this.getContext(),R.layout.bluetooth_list_view,devicesArray);
+                connectedDevicesList.setAdapter(bAdapter);
+
             }else{
                 bluetooth_switch.setChecked(false);
             }
@@ -116,7 +125,10 @@ public class BluetoothFragment extends Fragment{
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bleService.scanDevices(v);
+
+                ListView scannedDevicesList = (ListView) root.findViewById(R.id.search_devices_list);
+                bleService.scanDevices(scannedDevicesList);
+
                 bleService.getConnectedDevices();
             }
         });

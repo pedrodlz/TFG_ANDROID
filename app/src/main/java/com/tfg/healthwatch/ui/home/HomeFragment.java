@@ -1,5 +1,9 @@
 package com.tfg.healthwatch.ui.home;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,24 +16,63 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.tfg.healthwatch.BLEService;
+import com.tfg.healthwatch.DashboardActivity;
 import com.tfg.healthwatch.R;
 
 public class HomeFragment extends Fragment {
 
     private HomeViewModel homeViewModel;
+    private FirebaseUser currentUser;
+    private BLEService bleService;
+    private TextView heartDisplay;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+
         View root = inflater.inflate(R.layout.fragment_home, container, false);
-        final TextView textView = root.findViewById(R.id.text_home);
-        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+        heartDisplay = root.findViewById(R.id.heart_rate_display);
+        TextView welcomeText = root.findViewById(R.id.welcome_name);
+
+        bleService = DashboardActivity.getBleService();
+
+        //heartDisplay.setText(getActivity().getIntent().getExtras().getString("heartRate"));
+
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            welcomeText.setText("Welcome " + currentUser.getDisplayName());
+            // User is signed in
+        } else {
+            // No user is signed in
+        }
         return root;
+    }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String heartRate = intent.getExtras().get("heartRate").toString();
+
+            heartDisplay.setText(heartRate);
+
+            //or
+            //exercises = ParseJSON.ChallengeParseJSON(intent.getStringExtra(MY_KEY));
+
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(receiver, new IntentFilter("heartRate"));
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        getActivity().unregisterReceiver(receiver);
     }
 }

@@ -19,30 +19,34 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.tfg.healthwatch.ui.bluetooth.BluetoothObject;
+import com.tfg.healthwatch.ui.home.HomeFragment;
 
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class BLEService extends Service {
 
-    private Activity activity;
-    private View root;
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private String mBluetoothDeviceAddress;
     private BluetoothDevice tempDevice;
     private ArrayList<String> scannedStringArray = new ArrayList<String>();
-    private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();    private BluetoothGatt mBluetoothGatt;
+    private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
+    private BluetoothListAdapter bAdapter;
+    private BluetoothGatt mBluetoothGatt;
     private boolean notificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
     private static final int REQUEST_ENABLE_BT = 0;
     private String TAG = "BluetoothFragment";
+    private ListView scannedDevicesListView;
+    private TextView heartRateTextView;
 
     public final static UUID HEART_RATE_SERVICE =
             UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
@@ -53,10 +57,13 @@ public class BLEService extends Service {
     public final static UUID CLIENT_CHARACTERISTIC_CONFIGURATION =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-    public BLEService(String address, Activity activity, View root) {
-        this.activity = activity;
-        this.root = root;
-        mBluetoothManager = (BluetoothManager) activity.getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
+    public void onCreate() {
+    }
+
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand");
+        intent.getStringExtra("");
+        return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -71,7 +78,6 @@ public class BLEService extends Service {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 mConnectionState = BluetoothProfile.STATE_CONNECTED;
                 mBluetoothDeviceAddress = tempDevice.getAddress();
-                displayConnected();
 
                 // Attempts to discover services after successful connection.
                 gatt.discoverServices();
@@ -127,11 +133,10 @@ public class BLEService extends Service {
             super.onScanResult(callbackType, result);
             Log.d(TAG,": onScanResult" + result.getDevice().toString());
 
-            BluetoothListAdapter bAdapter = new BluetoothListAdapter(
-                    activity,R.layout.bluetooth_list_view,scannedDevices);
+            bAdapter = new BluetoothListAdapter(
+                    getApplicationContext(),R.layout.bluetooth_list_view,scannedDevices);
 
-            ListView scannedDevicesList = (ListView) root.findViewById(R.id.search_devices_list);
-            scannedDevicesList.setAdapter(bAdapter);
+            scannedDevicesListView.setAdapter(bAdapter);
 
             if(!scannedStringArray.contains(result.getDevice().getAddress())){
                 scannedStringArray.add(result.getDevice().getAddress());
@@ -146,23 +151,13 @@ public class BLEService extends Service {
         }
     };
 
-    private void displayConnected(){
-        ListView connectedDevicesList = (ListView) root.findViewById(R.id.connected_devices_list);
-        ArrayList<BluetoothObject> devicesArray = new ArrayList<BluetoothObject>();
-
-        devicesArray.add(new BluetoothObject(tempDevice.getName(),tempDevice.getAddress()));
-
-        BluetoothListAdapter bAdapter = new BluetoothListAdapter(
-                activity,R.layout.bluetooth_list_view,devicesArray);
-        connectedDevicesList.setAdapter(bAdapter);
-    }
-
-    public List<BluetoothDevice> getConnectedDevices(){
+    public ArrayList<BluetoothObject> getConnectedDevices(){
 
         List<BluetoothDevice> connectedArray = null;
+        ArrayList<BluetoothObject> devicesArray = null;
 
         if(mBluetoothAdapter.isEnabled()){
-            ArrayList<BluetoothObject> devicesArray = new ArrayList<BluetoothObject>();
+            devicesArray = new ArrayList<BluetoothObject>();
             connectedArray = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
 
             if(connectedArray.size() > 0){
@@ -177,7 +172,7 @@ public class BLEService extends Service {
             }
         }
 
-        return connectedArray;
+        return devicesArray;
     }
 
     public boolean checkBluetooth(){
@@ -191,20 +186,15 @@ public class BLEService extends Service {
         }
     }
 
-    public void requestBluetooth(){
-        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-    }
-
-
     public void createToast(Context context, String text){
         Toast toast = Toast.makeText(context,text,Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER | Gravity.BOTTOM, 0, 0);
         toast.show();
     }
 
-    public void scanDevices(View v){
+    public BluetoothListAdapter scanDevices(ListView scannedDevicesList){
         String subTag = "scanDevices";
+        scannedDevicesListView = scannedDevicesList;
 
         try{
             Handler mHandler = new Handler(Looper.getMainLooper());
@@ -222,6 +212,7 @@ public class BLEService extends Service {
             Log.d(TAG+subTag,e.toString());
         }
 
+        return bAdapter;
     }
 
     public boolean connect(String address) {
@@ -238,7 +229,7 @@ public class BLEService extends Service {
             }
             // We want to directly connect to the device, so we are setting the autoConnect
             // parameter to false.
-            mBluetoothGatt = device.connectGatt(activity.getApplicationContext(), false, mGattCallback);
+            mBluetoothGatt = device.connectGatt(getApplicationContext(), false, mGattCallback);
             Log.d(TAG, "Trying to create a new connection.");
             mConnectionState = BluetoothProfile.STATE_CONNECTING;
             tempDevice = device;
@@ -259,7 +250,12 @@ public class BLEService extends Service {
                 format = BluetoothGattCharacteristic.FORMAT_UINT8;
             }
 
-            final int heartRate = characteristic.getIntValue(format,1);
+            Integer heartRate = characteristic.getIntValue(format,1);
+
+            Intent intent = new Intent("heartRate"); //FILTER is a string to identify this intent
+            intent.putExtra("heartRate", heartRate.toString());
+            sendBroadcast(intent);
+
             Log.d(TAG,"HEART RATE: "+heartRate);
         }
     }
