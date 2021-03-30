@@ -47,13 +47,14 @@ import java.util.UUID;
 public class BluetoothFragment extends Fragment{
 
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private BluetoothManager mBluetoothManager;
     private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
+    private ArrayList<BluetoothObject> connectedDevices = new ArrayList<BluetoothObject>();
     private View root;
     private String TAG = "BluetoothFragment";
     private static final int REQUEST_ENABLE_BT = 0;
     private static final String SCANNED_INTENT = "com.tfg.healthwatch.SCANNED_DEVICES";
-
+    private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
+    private static String CONNECTED_LIST_INTENT = "com.tfg.healthwatch.CONNECTED_LIST";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -62,15 +63,15 @@ public class BluetoothFragment extends Fragment{
 
         IntentFilter params = new IntentFilter();
         params.addAction(SCANNED_INTENT);
+        params.addAction(CONNECTED_LIST_INTENT);
         getActivity().registerReceiver(receiver,params);
 
         if(checkBluetooth()){
-            mBluetoothManager = (BluetoothManager) getContext().getSystemService(Context.BLUETOOTH_SERVICE);
             Switch bluetooth_switch = (Switch) root.findViewById(R.id.bluetooth_switch);
 
             if(mBluetoothAdapter.isEnabled()){
                 bluetooth_switch.setChecked(true);
-                getConnectedDevices();
+                getContext().sendBroadcast(new Intent(GET_CONNECTED_INTENT));
 
             }else{
                 bluetooth_switch.setChecked(false);
@@ -91,34 +92,6 @@ public class BluetoothFragment extends Fragment{
             Log.d(TAG+subTag, "Started bluetooth adapter");
             return true;
         }
-    }
-
-    public void getConnectedDevices(){
-
-        List<BluetoothDevice> connectedArray = null;
-        ArrayList<BluetoothObject> devicesArray = null;
-
-        if(mBluetoothAdapter.isEnabled()){
-            devicesArray = new ArrayList<BluetoothObject>();
-            connectedArray = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
-
-            if(connectedArray.size() > 0){
-
-                /*if(mBluetoothDeviceAddress != connectedArray.get(0).getAddress()){
-                    connect(connectedArray.get(0).getAddress());
-                }*/
-
-                for(BluetoothDevice device : connectedArray){
-                    devicesArray.add(new BluetoothObject(device.getName(),device.getAddress()));
-                }
-            }
-        }
-
-        ListView connectedDevicesList = (ListView) root.findViewById(R.id.connected_devices_list);
-
-        BluetoothListAdapter bAdapter = new BluetoothListAdapter(
-                this.getContext(),R.layout.bluetooth_list_view,devicesArray);
-        connectedDevicesList.setAdapter(bAdapter);
     }
 
     @Override
@@ -150,11 +123,28 @@ public class BluetoothFragment extends Fragment{
         searchDevice.setAdapter(bAdapter);
     }
 
+    public void setConnectedList(ArrayList<BluetoothObject> connected){
+        connectedDevices = connected;
+
+        BluetoothListAdapter bAdapter = new BluetoothListAdapter(
+                getContext(),R.layout.bluetooth_list_view,connectedDevices);
+
+        ListView connectedDevices = root.findViewById(R.id.connected_devices_list);
+        connectedDevices.setAdapter(bAdapter);
+    }
+
+
     BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(intent.filterEquals(new Intent().setAction(SCANNED_INTENT))){
+            final String action = intent.getAction();
+
+            if(action.equals(SCANNED_INTENT)){
                 setScannedDevices((ArrayList<BluetoothObject>) intent.getExtras().getSerializable("scannedDevices"));
+            }
+            else if (action.equals(CONNECTED_LIST_INTENT)){
+                Toast.makeText(getContext(), "Connected List send", Toast.LENGTH_SHORT).show();
+                setConnectedList((ArrayList<BluetoothObject>) intent.getExtras().getSerializable("connectedDevices"));
             }
         }
     };
@@ -184,7 +174,7 @@ public class BluetoothFragment extends Fragment{
             @Override
             public void onClick(View v) {
                 getContext().sendBroadcast(new Intent().setAction("com.tfg.healthwatch.SCAN"));
-                getConnectedDevices();
+                getContext().sendBroadcast(new Intent(GET_CONNECTED_INTENT));
             }
         });
     }

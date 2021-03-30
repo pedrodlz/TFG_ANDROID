@@ -37,6 +37,7 @@ import java.util.UUID;
 public class BLEService extends Service {
 
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothManager mBluetoothManager;
     private String mBluetoothDeviceAddress;
     private BluetoothDevice tempDevice;
     private ArrayList<String> scannedStringArray = new ArrayList<String>();
@@ -45,6 +46,7 @@ public class BLEService extends Service {
     private boolean notificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
     private String TAG = "BLEService";
+    private static String CONNECTED_LIST_INTENT = "com.tfg.healthwatch.CONNECTED_LIST";
     // Binder given to clients
     private final IBinder binder = new LocalBinder();
 
@@ -73,6 +75,7 @@ public class BLEService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
         intent.getStringExtra("");
+        mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -160,6 +163,32 @@ public class BLEService extends Service {
             Log.d(TAG,": onScanFailed"+errorCode);
         }
     };
+
+    public void getConnectedDevices(){
+
+        List<BluetoothDevice> connectedArray = null;
+        ArrayList<BluetoothObject> devicesArray = null;
+
+        if(mBluetoothAdapter.isEnabled()){
+            devicesArray = new ArrayList<BluetoothObject>();
+            connectedArray = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
+
+            if(connectedArray.size() > 0){
+
+                if(mBluetoothDeviceAddress != connectedArray.get(0).getAddress()){
+                    connect(connectedArray.get(0).getAddress());
+                }
+
+                for(BluetoothDevice device : connectedArray){
+                    devicesArray.add(new BluetoothObject(device.getName(),device.getAddress()));
+                }
+            }
+        }
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("connectedDevices",(Serializable)devicesArray);
+        sendBroadcast(new Intent(CONNECTED_LIST_INTENT).putExtras(bundle));
+    }
 
     public void scanDevices(){
         String subTag = "scanDevices";

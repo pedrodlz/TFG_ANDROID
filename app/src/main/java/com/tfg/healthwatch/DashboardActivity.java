@@ -15,6 +15,7 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -28,6 +29,8 @@ public class DashboardActivity extends AppCompatActivity {
     boolean mBound = false;
     static final String HEART_RATE_INTENT = "com.tfg.healthwatch.HEART_RATE";
     static final String SCAN_INTENT = "com.tfg.healthwatch.SCAN";
+    private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
+
 
     @Override
     public void onStart() {
@@ -48,7 +51,7 @@ public class DashboardActivity extends AppCompatActivity {
         IntentFilter params = new IntentFilter();
         params.addAction(HEART_RATE_INTENT);
         params.addAction(SCAN_INTENT);
-        params.addAction("com.tfg.healthwatch.CUSTOM_INTENT");
+        params.addAction(GET_CONNECTED_INTENT);
         this.registerReceiver(receiver,params);
         //bleService = new BLEService();
 
@@ -84,14 +87,16 @@ public class DashboardActivity extends AppCompatActivity {
             final String action = intent.getAction();
 
             if(action.equals(HEART_RATE_INTENT)){
-                Toast.makeText(getApplicationContext(), "Heart Rate Received", Toast.LENGTH_SHORT).show();
+                TextView heartDisplay = findViewById(R.id.heart_rate_display);
+                heartDisplay.setText(intent.getStringExtra("heartRate"));
             }
             else if(action.equals(SCAN_INTENT)){
                 Toast.makeText(getApplicationContext(), "Scan Received", Toast.LENGTH_SHORT).show();
                 mService.scanDevices();
             }
-            else{
-                Toast.makeText(getApplicationContext(), "Other Intent", Toast.LENGTH_SHORT).show();
+            else if(action.equals(GET_CONNECTED_INTENT)){
+                //Toast.makeText(getApplicationContext(), "Connected received", Toast.LENGTH_SHORT).show();
+                mService.getConnectedDevices();
             }
         }
     };
