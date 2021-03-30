@@ -12,8 +12,10 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -44,34 +46,31 @@ import java.util.UUID;
 
 public class BluetoothFragment extends Fragment{
 
-    private BluetoothViewModel bluetoothViewModel;
-    private BLEService bleService;
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothManager mBluetoothManager;
+    private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
     private View root;
     private String TAG = "BluetoothFragment";
+    private static final int REQUEST_ENABLE_BT = 0;
+    private static final String SCANNED_INTENT = "com.tfg.healthwatch.SCANNED_DEVICES";
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        bluetoothViewModel = new ViewModelProvider(this).get(BluetoothViewModel.class);
         root = inflater.inflate(R.layout.fragment_bluetooth, container, false);
 
-        bleService = DashboardActivity.getBleService();
-        //bleService = new BLEService("DD:80:0D:1E:D0:53",getActivity(),root);
+        IntentFilter params = new IntentFilter();
+        params.addAction(SCANNED_INTENT);
+        getActivity().registerReceiver(receiver,params);
 
-        if(bleService.checkBluetooth()){
+        if(checkBluetooth()){
+            mBluetoothManager = (BluetoothManager) getContext().getSystemService(Context.BLUETOOTH_SERVICE);
             Switch bluetooth_switch = (Switch) root.findViewById(R.id.bluetooth_switch);
 
             if(mBluetoothAdapter.isEnabled()){
                 bluetooth_switch.setChecked(true);
-
-                ListView connectedDevicesList = (ListView) root.findViewById(R.id.connected_devices_list);
-                ArrayList<BluetoothObject> devicesArray = bleService.getConnectedDevices();
-
-                BluetoothListAdapter bAdapter = new BluetoothListAdapter(
-                        this.getContext(),R.layout.bluetooth_list_view,devicesArray);
-                connectedDevicesList.setAdapter(bAdapter);
+                getConnectedDevices();
 
             }else{
                 bluetooth_switch.setChecked(false);
@@ -83,6 +82,45 @@ public class BluetoothFragment extends Fragment{
         return root;
     }
 
+    public boolean checkBluetooth(){
+        String subTag = ": checkBluetooth";
+        if (mBluetoothAdapter == null) {
+            Log.d(TAG+subTag, "Cannot start bluetooth adapter");
+            return false;
+        } else {
+            Log.d(TAG+subTag, "Started bluetooth adapter");
+            return true;
+        }
+    }
+
+    public void getConnectedDevices(){
+
+        List<BluetoothDevice> connectedArray = null;
+        ArrayList<BluetoothObject> devicesArray = null;
+
+        if(mBluetoothAdapter.isEnabled()){
+            devicesArray = new ArrayList<BluetoothObject>();
+            connectedArray = mBluetoothManager.getConnectedDevices(BluetoothProfile.GATT);
+
+            if(connectedArray.size() > 0){
+
+                /*if(mBluetoothDeviceAddress != connectedArray.get(0).getAddress()){
+                    connect(connectedArray.get(0).getAddress());
+                }*/
+
+                for(BluetoothDevice device : connectedArray){
+                    devicesArray.add(new BluetoothObject(device.getName(),device.getAddress()));
+                }
+            }
+        }
+
+        ListView connectedDevicesList = (ListView) root.findViewById(R.id.connected_devices_list);
+
+        BluetoothListAdapter bAdapter = new BluetoothListAdapter(
+                this.getContext(),R.layout.bluetooth_list_view,devicesArray);
+        connectedDevicesList.setAdapter(bAdapter);
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -90,12 +128,36 @@ public class BluetoothFragment extends Fragment{
         if(resultCode == Activity.RESULT_OK){
             // bluetooth enabled
             bluetooth_switch.setChecked(true);
-            bleService.createToast(getContext(),"Bluetooth On");
+            Toast.makeText(getContext(),"Bluetooth ON",Toast.LENGTH_SHORT);
         }else{
             bluetooth_switch.setChecked(false);
-            bleService.createToast(getContext(),"Bluetooth Off");
+            Toast.makeText(getContext(),"Bluetooth OFF",Toast.LENGTH_SHORT);
         }
     }
+
+    public void requestBluetooth(){
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        getActivity().startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+    }
+
+    public void setScannedDevices(ArrayList<BluetoothObject> scanned){
+        scannedDevices = scanned;
+
+        BluetoothListAdapter bAdapter = new BluetoothListAdapter(
+                getContext(),R.layout.bluetooth_list_view,scannedDevices);
+
+        ListView searchDevice = root.findViewById(R.id.search_devices_list);
+        searchDevice.setAdapter(bAdapter);
+    }
+
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if(intent.filterEquals(new Intent().setAction(SCANNED_INTENT))){
+                setScannedDevices((ArrayList<BluetoothObject>) intent.getExtras().getSerializable("scannedDevices"));
+            }
+        }
+    };
 
     public void startListeners(){
 
@@ -109,15 +171,11 @@ public class BluetoothFragment extends Fragment{
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b) {
-                    Log.d(TAG+subTag,"Attempting to activate Bluetooth...");
-                    bleService.requestBluetooth();
+                    Toast.makeText(getContext(),"Attempting to activate Bluetooth...",Toast.LENGTH_SHORT);
+                    requestBluetooth();
                 } else {
-                    Log.d(TAG+subTag,"Disconnecting Bluetooth");
+                    Toast.makeText(getContext(),"Disconnecting Bluetooth",Toast.LENGTH_SHORT);
                     mBluetoothAdapter.disable();
-                    if(!mBluetoothAdapter.isEnabled()) {
-                        bluetooth_switch.setChecked(false);
-                        bleService.createToast(getContext(),"Bluetooth Off");
-                    }
                 }
             }
         });
@@ -125,11 +183,8 @@ public class BluetoothFragment extends Fragment{
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                ListView scannedDevicesList = (ListView) root.findViewById(R.id.search_devices_list);
-                bleService.scanDevices(scannedDevicesList);
-
-                bleService.getConnectedDevices();
+                getContext().sendBroadcast(new Intent().setAction("com.tfg.healthwatch.SCAN"));
+                getConnectedDevices();
             }
         });
     }

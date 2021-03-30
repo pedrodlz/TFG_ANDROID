@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,15 @@ public class HomeFragment extends Fragment {
     private FirebaseUser currentUser;
     private BLEService bleService;
     private TextView heartDisplay;
+    private BroadcastReceiver _refreshReceiver = new MyReceiver();
+
+    private class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast toast = Toast.makeText(context, "Broadcast received", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -37,6 +47,8 @@ public class HomeFragment extends Fragment {
         TextView welcomeText = root.findViewById(R.id.welcome_name);
 
         bleService = DashboardActivity.getBleService();
+        IntentFilter filter = new IntentFilter("HeartRate");
+        requireActivity().registerReceiver(_refreshReceiver,filter);
 
         //heartDisplay.setText(getActivity().getIntent().getExtras().getString("heartRate"));
 
@@ -50,7 +62,7 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    /*private BroadcastReceiver receiver = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -74,5 +86,5 @@ public class HomeFragment extends Fragment {
     public void onPause(){
         super.onPause();
         getActivity().unregisterReceiver(receiver);
-    }
+    }*/
 }

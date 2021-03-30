@@ -1,6 +1,10 @@
 package com.tfg.healthwatch.ui.bluetooth;
 
-public class BluetoothObject {
+import android.os.Parcelable;
+
+import java.io.Serializable;
+
+public class BluetoothObject implements Serializable {
 
     private String name;
     private String address;
