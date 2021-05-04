@@ -7,15 +7,69 @@
     tools:context=".ui.settings.SettingsFragment">
 
 
-    <Button
-        android:id="@+id/google_logout_btn"
-        style="@style/Widget.AppCompat.Button.Small"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:drawableLeft="@drawable/googleg_standard_color_18"
-        android:text="@string/log_out"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        tools:layout_editor_absoluteY="36dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="59dp"            >
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="268dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:singleLine="false"
+                android:text="Account:"
+                android:padding="16dp"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/google_logout_btn"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableRight="@drawable/googleg_standard_color_18"
+                android:singleLine="true"
+                android:text="@string/log_out" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="61dp">
+
+            <TextView
+                android:id="@+id/language"
+                android:layout_width="133dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:singleLine="false"
+                android:text="Language:"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/language_selected"
+                android:layout_width="145dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:singleLine="false"
+                android:text="English"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/change_language"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:text="Change" />
+        </LinearLayout>
+
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

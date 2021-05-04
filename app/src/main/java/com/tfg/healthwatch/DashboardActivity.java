@@ -1,20 +1,24 @@
 package com.tfg.healthwatch;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,14 +31,13 @@ public class DashboardActivity extends AppCompatActivity {
     private static BLEService mService;
     private Database DBService;
     boolean mBound = false;
-    static final String HEART_RATE_INTENT = "com.tfg.healthwatch.HEART_RATE";
-    static final String SCAN_INTENT = "com.tfg.healthwatch.SCAN";
-    private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
-
+    private static String heartRate;
+    private TextView heartDisplay;
 
     @Override
     public void onStart() {
         super.onStart();
+        heartDisplay = findViewById(R.id.heart_rate_display);
         // Bind to LocalService
         Intent intent = new Intent(this, BLEService.class);
         if(bindService(intent, connection, Context.BIND_AUTO_CREATE)){
@@ -48,19 +51,8 @@ public class DashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
 
         startService(new Intent(this,BLEService.class));
-        IntentFilter params = new IntentFilter();
-        params.addAction(HEART_RATE_INTENT);
-        params.addAction(SCAN_INTENT);
-        params.addAction(GET_CONNECTED_INTENT);
-        this.registerReceiver(receiver,params);
+
         //bleService = new BLEService();
-
-        /*FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("test");
-
-        myRef.setValue("MAMON DE MIERDA");
-
-        Log.d("PESAO","AAAAAAAAAAAAA");*/
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -79,27 +71,17 @@ public class DashboardActivity extends AppCompatActivity {
         stopService(new Intent(this,BLEService.class));
     }
 
-    private BroadcastReceiver receiver = new BroadcastReceiver()
-    {
-        @Override
-        public void onReceive(Context context, Intent intent)
-        {
-            final String action = intent.getAction();
 
-            if(action.equals(HEART_RATE_INTENT)){
-                TextView heartDisplay = findViewById(R.id.heart_rate_display);
-                heartDisplay.setText(intent.getStringExtra("heartRate"));
-            }
-            else if(action.equals(SCAN_INTENT)){
-                Toast.makeText(getApplicationContext(), "Scan Received", Toast.LENGTH_SHORT).show();
-                mService.scanDevices();
-            }
-            else if(action.equals(GET_CONNECTED_INTENT)){
-                //Toast.makeText(getApplicationContext(), "Connected received", Toast.LENGTH_SHORT).show();
-                mService.getConnectedDevices();
-            }
-        }
-    };
+    /*@Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+
+        if(requestCode == )
+
+    }*/
+
+
 
     private ServiceConnection connection = new ServiceConnection() {
 

@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.tfg.healthwatch.DashboardActivity;
 import com.tfg.healthwatch.MainActivity;
 import com.tfg.healthwatch.R;
+import com.tfg.healthwatch.ui.login.LoginActivity;
 
 public class SettingsFragment extends Fragment {
 
@@ -37,7 +38,7 @@ public class SettingsFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_settings, container, false);
 
         googleLogOut = root.findViewById(R.id.google_logout_btn);
-        mGoogleSignInClient = MainActivity.getmGoogleSignInClient();
+        mGoogleSignInClient = LoginActivity.getmGoogleSignInClient();
 
         googleLogOut.setOnClickListener(new View.OnClickListener() {
             @Override

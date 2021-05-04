@@ -1,33 +1,42 @@
 {
   "project_info": {
-    "project_number": "207183911809",
-    "project_id": "healthwatch-3eb5a",
-    "storage_bucket": "healthwatch-3eb5a.appspot.com"
+    "project_number": "912540011416",
+    "firebase_url": "https://healthwatch-72001-default-rtdb.firebaseio.com",
+    "project_id": "healthwatch-72001",
+    "storage_bucket": "healthwatch-72001.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:207183911809:android:1327ab88c511c943c5e680",
+        "mobilesdk_app_id": "1:912540011416:android:ff241bc7946b63c7a739ed",
         "android_client_info": {
           "package_name": "com.tfg.healthwatch"
         }
       },
       "oauth_client": [
         {
-          "client_id": "207183911809-cr3t340j2q28tedtkmpcnh2cmnipenmg.apps.googleusercontent.com",
+          "client_id": "912540011416-nvecih5013nv8ucg7e0h0flfto6i1klt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tfg.healthwatch",
+            "certificate_hash": "cbc78d0c0b4df3a6ef3c17755e3516383c0e0f57"
+          }
+        },
+        {
+          "client_id": "912540011416-d2h7js57h8qp3kar6n2d93mc5883cu9b.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyA1j83MwEdnXUYEq7mwde9e6oJEjtJaKTI"
+          "current_key": "AIzaSyCVHsOhdZzdBocopfnTPMaseFDhKgaF2-U"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "207183911809-cr3t340j2q28tedtkmpcnh2cmnipenmg.apps.googleusercontent.com",
+              "client_id": "912540011416-d2h7js57h8qp3kar6n2d93mc5883cu9b.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

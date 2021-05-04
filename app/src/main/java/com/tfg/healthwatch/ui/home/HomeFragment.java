@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,25 +20,21 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.tfg.healthwatch.BLEService;
 import com.tfg.healthwatch.DashboardActivity;
 import com.tfg.healthwatch.R;
+import com.tfg.healthwatch.ui.bluetooth.BluetoothObject;
+
+import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
-    private HomeViewModel homeViewModel;
     private FirebaseUser currentUser;
-    private BLEService bleService;
     private TextView heartDisplay;
-    private BroadcastReceiver _refreshReceiver = new MyReceiver();
-
-    private class MyReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Toast toast = Toast.makeText(context, "Broadcast received", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-    }
+    private Button mAddButton;
+    static final String HEART_RATE_INTENT = "com.tfg.healthwatch.HEART_RATE";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -46,11 +43,18 @@ public class HomeFragment extends Fragment {
         heartDisplay = root.findViewById(R.id.heart_rate_display);
         TextView welcomeText = root.findViewById(R.id.welcome_name);
 
-        bleService = DashboardActivity.getBleService();
-        IntentFilter filter = new IntentFilter("HeartRate");
-        requireActivity().registerReceiver(_refreshReceiver,filter);
-
         //heartDisplay.setText(getActivity().getIntent().getExtras().getString("heartRate"));
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference mRef = database.getReference("test");
+
+        mAddButton = (Button) root.findViewById(R.id.add_value);
+        mAddButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mRef.setValue("MIERDAAAAA");
+            }
+        });
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
@@ -61,6 +65,18 @@ public class HomeFragment extends Fragment {
         }
         return root;
     }
+
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if(action.equals(HEART_RATE_INTENT)){
+                String heartRate = intent.getStringExtra("heartRate");
+                heartDisplay.setText(heartRate);
+            }
+        }
+    };
 
     /*private BroadcastReceiver receiver = new BroadcastReceiver() {
 
@@ -74,17 +90,19 @@ public class HomeFragment extends Fragment {
             //exercises = ParseJSON.ChallengeParseJSON(intent.getStringExtra(MY_KEY));
 
         }
-    };
+    };*/
 
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(receiver, new IntentFilter("heartRate"));
+        IntentFilter params = new IntentFilter();
+        params.addAction(HEART_RATE_INTENT);
+        getActivity().registerReceiver(receiver,params);
     }
 
     @Override
     public void onPause(){
         super.onPause();
         getActivity().unregisterReceiver(receiver);
-    }*/
+    }
 }

@@ -8,45 +8,65 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
-import android.view.Gravity;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Switch;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.ui.bluetooth.BluetoothObject;
-import com.tfg.healthwatch.ui.home.HomeFragment;
 
-import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class BLEService extends Service {
 
-    private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothAdapter mBluetoothAdapter;
     private BluetoothManager mBluetoothManager;
     private String mBluetoothDeviceAddress;
-    private BluetoothDevice tempDevice;
     private ArrayList<String> scannedStringArray = new ArrayList<String>();
     private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
     private BluetoothGatt mBluetoothGatt;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private boolean notificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
     private String TAG = "BLEService";
+    private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
     private static String CONNECTED_LIST_INTENT = "com.tfg.healthwatch.CONNECTED_LIST";
+    static final String SCAN_INTENT = "com.tfg.healthwatch.SCAN";
+    private static final String SCANNED_INTENT = "com.tfg.healthwatch.SCANNED_DEVICES";
+
+
     // Binder given to clients
     private final IBinder binder = new LocalBinder();
 
@@ -58,6 +78,12 @@ public class BLEService extends Service {
             UUID.fromString("00002a39-0000-1000-8000-00805f9b34fb");
     public final static UUID CLIENT_CHARACTERISTIC_CONFIGURATION =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+
+    private static final UUID Battery_Service_UUID =
+            UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
+    private static final UUID Battery_Level_UUID =
+            UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
+
 
     public BLEService(){};
 
@@ -74,9 +100,52 @@ public class BLEService extends Service {
 
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand");
-        intent.getStringExtra("");
         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        IntentFilter params = new IntentFilter();
+        params.addAction(SCAN_INTENT);
+        params.addAction(GET_CONNECTED_INTENT);
+        this.registerReceiver(receiver,params);
+        initialize();
+        getConnectedDevices();
         return super.onStartCommand(intent, flags, startId);
+    }
+
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if(action.equals(GET_CONNECTED_INTENT)){
+                getConnectedDevices();
+            }
+            else if(action.equals(SCAN_INTENT)){
+                scanDevices();
+            }
+        }
+    };
+
+    public boolean initialize() {
+        // For API level 18 and above, get a reference to BluetoothAdapter through
+        // BluetoothManager.
+        if (mBluetoothManager == null) {
+            mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+            if (mBluetoothManager == null) {
+                Log.e(TAG, "Unable to initialize BluetoothManager.");
+                return false;
+            }
+        }
+
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+        if (mBluetoothAdapter == null) {
+            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
+            return false;
+        }
+
+        if(!mBluetoothAdapter.isEnabled()){
+            requestBluetooth();
+        }
+
+        return true;
     }
 
     @Override
@@ -87,6 +156,21 @@ public class BLEService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
+        unregisterReceiver(receiver);
+    }
+
+    public boolean checkBluetooh(){
+        return mBluetoothAdapter.isEnabled();
+    }
+
+    public void requestBluetooth(){
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        enableBtIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getApplicationContext().startActivity(enableBtIntent);
+    }
+
+    public void disableBluetooth(){
+        mBluetoothAdapter.disable();
     }
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -94,13 +178,13 @@ public class BLEService extends Service {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 mConnectionState = BluetoothProfile.STATE_CONNECTED;
-                mBluetoothDeviceAddress = tempDevice.getAddress();
+                mBluetoothDeviceAddress = gatt.getDevice().getAddress();
+                getConnectedDevices();
                 // Attempts to discover services after successful connection.
                 gatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
                 mBluetoothDeviceAddress = null;
-                tempDevice = null;
             }
         }
 
@@ -110,6 +194,7 @@ public class BLEService extends Service {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 //Log.d(TAG,"GATT SUCCESS");
                 if(!notificationOn){
+
                     BluetoothGattCharacteristic characteristic = gatt.getService(HEART_RATE_SERVICE).getCharacteristic(UUID_HEART_RATE_MEASUREMENT);
                     gatt.setCharacteristicNotification(characteristic,true);
 
@@ -154,7 +239,7 @@ public class BLEService extends Service {
 
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("scannedDevices",(Serializable)scannedDevices);
-                sendBroadcast(new Intent("com.tfg.healthwatch.SCANNED_DEVICES").putExtras(bundle));
+                sendBroadcast(new Intent(SCANNED_INTENT).putExtras(bundle));
             }
         }
 
@@ -163,6 +248,42 @@ public class BLEService extends Service {
             Log.d(TAG,": onScanFailed"+errorCode);
         }
     };
+
+    public void getbattery() {
+
+        Set pairedDevices = mBluetoothAdapter.getBondedDevices();
+        Log.d("Paired devices",pairedDevices.toString());
+        /*BluetoothGattService batteryService = mBluetoothGatt.getService(Battery_Service_UUID);
+
+        List<BluetoothGattService> servicesList;
+        servicesList = getSupportedGattServices();
+        Iterator<BluetoothGattService> iter = servicesList.iterator();
+        while (iter.hasNext()) {
+            BluetoothGattService bService = (BluetoothGattService) iter.next();
+            if (bService.getUuid().toString().equals(Battery_Level_UUID)){
+                batteryService = bService;
+            }
+        }
+        if(batteryService == null) {
+            Log.d(TAG, "Battery service not found!");
+            return;
+        }
+
+
+        BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(Battery_Level_UUID);
+        if(batteryLevel == null) {
+            Log.d(TAG, "Battery level not found!");
+            return;
+        }
+        mBluetoothGatt.readCharacteristic(batteryLevel);
+        Log.v(TAG, "batteryLevel = " + mBluetoothGatt.readCharacteristic(batteryLevel));*/
+    }
+
+    public List<BluetoothGattService> getSupportedGattServices() {
+        if (mBluetoothGatt == null) return null;
+
+        return mBluetoothGatt.getServices();
+    }
 
     public void getConnectedDevices(){
 
@@ -227,7 +348,6 @@ public class BLEService extends Service {
             mBluetoothGatt = device.connectGatt(getApplicationContext(), false, mGattCallback);
             Log.d(TAG, "Trying to create a new connection.");
             mConnectionState = BluetoothProfile.STATE_CONNECTING;
-            tempDevice = device;
         }
 
         return true;
@@ -245,7 +365,18 @@ public class BLEService extends Service {
             }
 
             Integer heartRate = characteristic.getIntValue(format,1);
-            sendBroadcast(new Intent().setAction("com.tfg.healthwatch.HEART_RATE").putExtra("heartRate",heartRate.toString()));
+
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+
+            LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
+            String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
+
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Heart Rates").child(userId).child(stringDate);
+
+            ref.push().setValue(heartRate);
+
+            sendBroadcast(new Intent("com.tfg.healthwatch.HEART_RATE").putExtra("heartRate",heartRate.toString()));
 
             Log.d(TAG,"HEART RATE: "+heartRate);
         }
