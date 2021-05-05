@@ -58,13 +58,15 @@ public class BLEService extends Service {
     private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
     private BluetoothGatt mBluetoothGatt;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private boolean notificationOn = false;
+    private boolean heartRateNotificationOn = false;
+    private boolean batteryNotificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
     private String TAG = "BLEService";
     private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
     private static String CONNECTED_LIST_INTENT = "com.tfg.healthwatch.CONNECTED_LIST";
     static final String SCAN_INTENT = "com.tfg.healthwatch.SCAN";
     private static final String SCANNED_INTENT = "com.tfg.healthwatch.SCANNED_DEVICES";
+    private static final String BATTERY_INTENT = "com.tfg.healthwatch.BATTERY_LEVEL";
 
 
     // Binder given to clients
@@ -79,9 +81,9 @@ public class BLEService extends Service {
     public final static UUID CLIENT_CHARACTERISTIC_CONFIGURATION =
             UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
-    private static final UUID Battery_Service_UUID =
+    private static final UUID BATTERY_SERVICE_UUID =
             UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
-    private static final UUID Battery_Level_UUID =
+    private static final UUID BATTERY_LEVEL_UUID =
             UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
 
 
@@ -193,7 +195,7 @@ public class BLEService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 //Log.d(TAG,"GATT SUCCESS");
-                if(!notificationOn){
+                if(!heartRateNotificationOn){
 
                     BluetoothGattCharacteristic characteristic = gatt.getService(HEART_RATE_SERVICE).getCharacteristic(UUID_HEART_RATE_MEASUREMENT);
                     gatt.setCharacteristicNotification(characteristic,true);
@@ -203,8 +205,22 @@ public class BLEService extends Service {
 
                     gatt.writeDescriptor(descriptor);
 
-                    notificationOn = true;
+                    heartRateNotificationOn = true;
                 }
+
+                /*if(!batteryNotificationOn){
+
+                    BluetoothGattCharacteristic characteristic = gatt.getService(BATTERY_SERVICE_UUID).getCharacteristic(BATTERY_LEVEL_UUID);
+
+                    gatt.setCharacteristicNotification(characteristic,true);
+
+                    BluetoothGattDescriptor descriptor = characteristic.getDescriptor(CLIENT_CHARACTERISTIC_CONFIGURATION);
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+
+                    gatt.writeDescriptor(descriptor);
+
+                    batteryNotificationOn = true;
+                }*/
             }
             else{
                 //Log.d(TAG,"GATT UNSUCCESS");
@@ -213,17 +229,66 @@ public class BLEService extends Service {
 
         @Override
         public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status){
-            BluetoothGattCharacteristic characteristic =
-                    gatt.getService(HEART_RATE_SERVICE)
-                            .getCharacteristic(HEART_RATE_CPOINT_CHAR);
-            characteristic.setValue(new byte[]{1, 1});
-            gatt.writeCharacteristic(characteristic);
+            if(status == BluetoothGatt.GATT_SUCCESS){
+                UUID charUUID = descriptor.getCharacteristic().getUuid();
+                if(charUUID.equals(UUID_HEART_RATE_MEASUREMENT)){
+                    BluetoothGattCharacteristic characteristic =
+                        gatt.getService(HEART_RATE_SERVICE)
+                                .getCharacteristic(HEART_RATE_CPOINT_CHAR);
+                    characteristic.setValue(new byte[]{1, 1});
+                    gatt.writeCharacteristic(characteristic);
+                }
+                else if(charUUID.equals(BATTERY_LEVEL_UUID)){
+                    getbattery();
+                }
+
+            }
+            else{
+                Log.d(TAG,"Error writing descriptor");
+            }
+
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status){
+            UUID charUUID = characteristic.getUuid();
+            Log.d(TAG,"Characteristic Write");
+            if(charUUID.equals(HEART_RATE_CPOINT_CHAR)){
+                BluetoothGattCharacteristic batteryLevel = gatt.getService(BATTERY_SERVICE_UUID).getCharacteristic(BATTERY_LEVEL_UUID);
+
+                gatt.setCharacteristicNotification(batteryLevel,true);
+
+                BluetoothGattDescriptor descriptor = batteryLevel.getDescriptor(CLIENT_CHARACTERISTIC_CONFIGURATION);
+                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+
+                gatt.writeDescriptor(descriptor);
+            }
         }
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic){
             Log.d(TAG,"Characteristic Changed");
-            readCharacteristic(characteristic);
+            UUID charUUID = characteristic.getUuid();
+            if(charUUID.equals(UUID_HEART_RATE_MEASUREMENT)){
+                readHeartRate(characteristic);
+            }
+            else if(charUUID.equals(BATTERY_LEVEL_UUID)){
+                readBatteryLevel(characteristic);
+            }
+        }
+
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            Log.d(TAG,"onCharacteristicRead");
+            if(status == BluetoothGatt.GATT_SUCCESS) {
+                UUID charUUID = characteristic.getUuid();
+                if(charUUID.equals(BATTERY_LEVEL_UUID)){
+                    readBatteryLevel(characteristic);
+                }
+            }
+            else{
+                Log.d(TAG,"Cannot read characteristic");
+            }
         }
     };
 
@@ -251,32 +316,18 @@ public class BLEService extends Service {
 
     public void getbattery() {
 
-        Set pairedDevices = mBluetoothAdapter.getBondedDevices();
-        Log.d("Paired devices",pairedDevices.toString());
-        /*BluetoothGattService batteryService = mBluetoothGatt.getService(Battery_Service_UUID);
-
-        List<BluetoothGattService> servicesList;
-        servicesList = getSupportedGattServices();
-        Iterator<BluetoothGattService> iter = servicesList.iterator();
-        while (iter.hasNext()) {
-            BluetoothGattService bService = (BluetoothGattService) iter.next();
-            if (bService.getUuid().toString().equals(Battery_Level_UUID)){
-                batteryService = bService;
-            }
-        }
+        BluetoothGattService batteryService = mBluetoothGatt.getService(BATTERY_SERVICE_UUID);
         if(batteryService == null) {
             Log.d(TAG, "Battery service not found!");
             return;
         }
 
-
-        BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(Battery_Level_UUID);
+        BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(BATTERY_LEVEL_UUID);
         if(batteryLevel == null) {
             Log.d(TAG, "Battery level not found!");
             return;
         }
         mBluetoothGatt.readCharacteristic(batteryLevel);
-        Log.v(TAG, "batteryLevel = " + mBluetoothGatt.readCharacteristic(batteryLevel));*/
     }
 
     public List<BluetoothGattService> getSupportedGattServices() {
@@ -353,7 +404,7 @@ public class BLEService extends Service {
         return true;
     }
 
-    public void readCharacteristic(BluetoothGattCharacteristic characteristic){
+    public void readHeartRate(BluetoothGattCharacteristic characteristic){
 
         if(mBluetoothGatt != null){
             int flag = characteristic.getProperties();
@@ -380,5 +431,10 @@ public class BLEService extends Service {
 
             Log.d(TAG,"HEART RATE: "+heartRate);
         }
+    }
+
+    public void readBatteryLevel(BluetoothGattCharacteristic characteristic){
+        String batteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0).toString();
+        sendBroadcast(new Intent(BATTERY_INTENT).putExtra("batteryLevel",batteryLevel));
     }
 }
