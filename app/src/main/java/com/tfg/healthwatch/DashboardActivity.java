@@ -40,9 +40,7 @@ public class DashboardActivity extends AppCompatActivity {
         heartDisplay = findViewById(R.id.heart_rate_display);
         // Bind to LocalService
         Intent intent = new Intent(this, BLEService.class);
-        if(bindService(intent, connection, Context.BIND_AUTO_CREATE)){
-            //Toast.makeText(getApplicationContext(), "Service binded", Toast.LENGTH_SHORT).show();
-        };
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     @Override

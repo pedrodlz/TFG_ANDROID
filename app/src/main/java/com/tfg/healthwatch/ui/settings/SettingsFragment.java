@@ -19,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.tfg.healthwatch.BLEService;
 import com.tfg.healthwatch.DashboardActivity;
 import com.tfg.healthwatch.MainActivity;
 import com.tfg.healthwatch.R;
@@ -49,6 +50,7 @@ public class SettingsFragment extends Fragment {
                     public void onComplete(@NonNull Task<Void> task) {
                         Intent intent = new Intent(getActivity(), MainActivity.class);
                         startActivity(intent);
+                        getActivity().finish();
                     }
                 });
             }

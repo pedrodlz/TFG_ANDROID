@@ -21,8 +21,11 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.BLEService;
 import com.tfg.healthwatch.DashboardActivity;
 import com.tfg.healthwatch.R;
@@ -49,7 +52,19 @@ public class HomeFragment extends Fragment {
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
-            welcomeText.setText("Welcome " + currentUser.getDisplayName());
+            DatabaseReference user = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid());
+            user.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String name = (String) dataSnapshot.child("name").getValue();
+                    welcomeText.setText("Welcome " + name);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    System.out.println("The read failed: " + databaseError.getCode());
+                }
+            });
             // User is signed in
         } else {
             // No user is signed in

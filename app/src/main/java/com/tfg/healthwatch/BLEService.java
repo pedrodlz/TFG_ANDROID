@@ -158,7 +158,9 @@ public class BLEService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
+        Log.d(TAG,"onDestroy service");
         unregisterReceiver(receiver);
+        stopNotifications();
     }
 
     public boolean checkBluetooh(){
@@ -186,6 +188,7 @@ public class BLEService extends Service {
                 gatt.discoverServices();
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
+                gatt.close();
                 mBluetoothDeviceAddress = null;
             }
         }
@@ -255,13 +258,13 @@ public class BLEService extends Service {
             Log.d(TAG,"Characteristic Write");
             if(charUUID.equals(HEART_RATE_CPOINT_CHAR)){
                 BluetoothGattCharacteristic batteryLevel = gatt.getService(BATTERY_SERVICE_UUID).getCharacteristic(BATTERY_LEVEL_UUID);
-
                 gatt.setCharacteristicNotification(batteryLevel,true);
 
                 BluetoothGattDescriptor descriptor = batteryLevel.getDescriptor(CLIENT_CHARACTERISTIC_CONFIGURATION);
                 descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
 
                 gatt.writeDescriptor(descriptor);
+                batteryNotificationOn = true;
             }
         }
 
@@ -291,6 +294,22 @@ public class BLEService extends Service {
             }
         }
     };
+
+    public void stopNotifications(){
+
+        if(heartRateNotificationOn){
+            BluetoothGattCharacteristic characteristic = mBluetoothGatt.getService(HEART_RATE_SERVICE).getCharacteristic(UUID_HEART_RATE_MEASUREMENT);
+            mBluetoothGatt.setCharacteristicNotification(characteristic,false);
+            heartRateNotificationOn = false;
+        }
+
+        if(batteryNotificationOn){
+            BluetoothGattCharacteristic batteryLevel = mBluetoothGatt.getService(BATTERY_SERVICE_UUID).getCharacteristic(BATTERY_LEVEL_UUID);
+            mBluetoothGatt.setCharacteristicNotification(batteryLevel,false);
+            batteryNotificationOn = false;
+        }
+
+    }
 
     public final ScanCallback mScanCallback = new ScanCallback() {
         @Override

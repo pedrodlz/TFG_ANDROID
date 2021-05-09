@@ -14,6 +14,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HealthWatch">
 
+        <!--
+               Set to true if your app is Standalone, that is, it does not require the handheld
+               app to run.
+        -->
+
+        <activity
+            android:name=".ui.login.SignUpActivity"
+            android:label="@string/title_activity_sign_up">
+        </activity>
+
         <service
             android:name=".Database"
             android:enabled="true"
@@ -42,6 +52,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>
