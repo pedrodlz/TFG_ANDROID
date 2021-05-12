@@ -71,20 +71,24 @@ public class BLEService extends Service {
 
     // Binder given to clients
     private final IBinder binder = new LocalBinder();
+    public static final String BASE_UUID = "0000%s-0000-1000-8000-00805f9b34fb"; //this is common for all BTLE devices. see http://stackoverflow.com/questions/18699251/finding-out-android-bluetooth-le-gatt-profiles
 
     public final static UUID HEART_RATE_SERVICE =
-            UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb");
+            UUID.fromString(String.format(BASE_UUID, "180d"));
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
-            UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb");
+            UUID.fromString(String.format(BASE_UUID, "2a37"));
     public final static UUID HEART_RATE_CPOINT_CHAR =
-            UUID.fromString("00002a39-0000-1000-8000-00805f9b34fb");
+            UUID.fromString(String.format(BASE_UUID, "2a39"));
     public final static UUID CLIENT_CHARACTERISTIC_CONFIGURATION =
-            UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+            UUID.fromString(String.format(BASE_UUID, "2902"));
 
     private static final UUID BATTERY_SERVICE_UUID =
-            UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
+            UUID.fromString(String.format(BASE_UUID, "180F"));
     private static final UUID BATTERY_LEVEL_UUID =
-            UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
+            UUID.fromString(String.format(BASE_UUID, "2a19"));
+
+    private static final UUID UUID_SERVICE_MIBAND_SERVICE = UUID.fromString(String.format(BASE_UUID, "FEE0"));
+    public static final UUID UUID_CHARACTERISTIC_REALTIME_STEPS = UUID.fromString("00000007-0000-3512-2118-0009af100700");
 
 
     public BLEService(){};
@@ -287,6 +291,10 @@ public class BLEService extends Service {
                 UUID charUUID = characteristic.getUuid();
                 if(charUUID.equals(BATTERY_LEVEL_UUID)){
                     readBatteryLevel(characteristic);
+                    getSteps();
+                }
+                else if(charUUID.equals(UUID_CHARACTERISTIC_REALTIME_STEPS)){
+                    readSteps(characteristic);
                 }
             }
             else{
@@ -294,6 +302,25 @@ public class BLEService extends Service {
             }
         }
     };
+
+    public void readSteps(BluetoothGattCharacteristic characteristic){
+
+        Log.d(TAG,"readSteps");
+        byte[] data = characteristic.getValue();
+
+        if (data.length >= 13) {
+            int steps, distance, calories;
+
+            steps =    ((((data[1] & 255) | ((data[2] & 255) << 8))) );
+            distance = ((((data[5] & 255) | ((data[6] & 255) << 8)) | (data[7] & 16711680)) | ((data[8] & 255) << 24));
+            calories = ((((data[9] & 255) | ((data[10] & 255) << 8)) | (data[11] & 16711680)) | ((data[12] & 255) << 24));
+
+            Log.d("Steps:", steps+"");
+            Log.d("distance:", distance+"");
+            Log.d("calories:", calories+"");
+        }
+
+    }
 
     public void stopNotifications(){
 
@@ -347,6 +374,22 @@ public class BLEService extends Service {
             return;
         }
         mBluetoothGatt.readCharacteristic(batteryLevel);
+    }
+
+    public void getSteps(){
+        Log.d(TAG,UUID_SERVICE_MIBAND_SERVICE.toString());
+        BluetoothGattService miBandService = mBluetoothGatt.getService(UUID_SERVICE_MIBAND_SERVICE);
+        if(miBandService == null) {
+            Log.d(TAG, "miBandService service not found!");
+            return;
+        }
+
+        BluetoothGattCharacteristic stepsCharacteristic = miBandService.getCharacteristic(UUID_CHARACTERISTIC_REALTIME_STEPS);
+        if(stepsCharacteristic == null) {
+            Log.d(TAG, "stepsCharacteristic not found!");
+            return;
+        }
+        mBluetoothGatt.readCharacteristic(stepsCharacteristic);
     }
 
     public List<BluetoothGattService> getSupportedGattServices() {
