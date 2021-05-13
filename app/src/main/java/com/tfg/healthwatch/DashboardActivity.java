@@ -29,15 +29,11 @@ import com.google.firebase.database.FirebaseDatabase;
 public class DashboardActivity extends AppCompatActivity {
 
     private static BLEService mService;
-    private Database DBService;
     boolean mBound = false;
-    private static String heartRate;
-    private TextView heartDisplay;
 
     @Override
     public void onStart() {
         super.onStart();
-        heartDisplay = findViewById(R.id.heart_rate_display);
         // Bind to LocalService
         Intent intent = new Intent(this, BLEService.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);

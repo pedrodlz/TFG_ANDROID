@@ -24,11 +24,6 @@
             android:label="@string/title_activity_sign_up">
         </activity>
 
-        <service
-            android:name=".Database"
-            android:enabled="true"
-            android:exported="true" />
-
         <activity android:name=".DashboardActivity">
             <intent-filter>
                 <action android:name="com.tfg.healtwatch.heartRate" />

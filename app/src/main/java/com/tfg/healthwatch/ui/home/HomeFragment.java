@@ -57,7 +57,9 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     String name = (String) dataSnapshot.child("name").getValue();
-                    welcomeText.setText("Welcome " + name);
+                    Toast.makeText(getContext(),name,Toast.LENGTH_SHORT).show();
+                    if(name.isEmpty()) name = currentUser.getDisplayName();
+                    welcomeText.setText("Welcome " + name + "!");
                 }
 
                 @Override

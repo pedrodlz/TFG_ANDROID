@@ -18,6 +18,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +41,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.ui.bluetooth.BluetoothObject;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -49,7 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class BLEService extends Service {
+public class BLEService extends Service implements SensorEventListener {
 
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothManager mBluetoothManager;
@@ -58,6 +63,8 @@ public class BLEService extends Service {
     private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
     private BluetoothGatt mBluetoothGatt;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private SensorManager sensorManager;
+    private Sensor mGravity;
     private boolean heartRateNotificationOn = false;
     private boolean batteryNotificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
@@ -67,7 +74,6 @@ public class BLEService extends Service {
     static final String SCAN_INTENT = "com.tfg.healthwatch.SCAN";
     private static final String SCANNED_INTENT = "com.tfg.healthwatch.SCANNED_DEVICES";
     private static final String BATTERY_INTENT = "com.tfg.healthwatch.BATTERY_LEVEL";
-
 
     // Binder given to clients
     private final IBinder binder = new LocalBinder();
@@ -93,6 +99,37 @@ public class BLEService extends Service {
 
     public BLEService(){};
 
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+
+            double loX = event.values[0];
+            double loY = event.values[1];
+            double loZ = event.values[2];
+
+            double loAccelerationReader = Math.sqrt(Math.pow(loX, 2)
+                    + Math.pow(loY, 2)
+                    + Math.pow(loZ, 2));
+
+            DecimalFormat precision = new DecimalFormat("0,00");
+            double ldAccRound = Double.parseDouble(precision.format(loAccelerationReader));
+
+            if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
+                //Do your stuff
+                Log.d("Sensor X",event.values[0]+ "m/s2");
+                Log.d("Sensor Y",event.values[1]+ "m/s2");
+                Log.d("Sensor Z",event.values[2]+ "m/s2");
+            }
+
+        }
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -112,7 +149,10 @@ public class BLEService extends Service {
         params.addAction(GET_CONNECTED_INTENT);
         this.registerReceiver(receiver,params);
         initialize();
+        startGravitySensor();
         getConnectedDevices();
+        getbattery();
+        getSteps();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -164,6 +204,9 @@ public class BLEService extends Service {
         super.onDestroy();
         Log.d(TAG,"onDestroy service");
         unregisterReceiver(receiver);
+        if(sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+            sensorManager.unregisterListener(this,mGravity);
+        }
         stopNotifications();
     }
 
@@ -179,6 +222,18 @@ public class BLEService extends Service {
 
     public void disableBluetooth(){
         mBluetoothAdapter.disable();
+    }
+
+    private void startGravitySensor(){
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        if(sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
+            mGravity = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            sensorManager.registerListener(this,mGravity, SensorManager.SENSOR_DELAY_NORMAL);
+        }
+        else{
+            Log.e(TAG,"Gravity sensor is not present");
+        }
     }
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -318,6 +373,18 @@ public class BLEService extends Service {
             Log.d("Steps:", steps+"");
             Log.d("distance:", distance+"");
             Log.d("calories:", calories+"");
+
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+
+            LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
+            String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
+
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Activity").child(userId).child(stringDate);
+
+            ref.child("Steps").setValue(steps);
+            ref.child("Distance").setValue(distance);
+            ref.child("Calories").setValue(calories);
         }
 
     }
@@ -485,7 +552,7 @@ public class BLEService extends Service {
             LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
             String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
 
-            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Heart Rates").child(userId).child(stringDate);
+            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Activity").child(userId).child(stringDate).child("Heart Rates");
 
             ref.push().setValue(heartRate);
 
