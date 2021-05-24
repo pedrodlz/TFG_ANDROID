@@ -35,6 +35,7 @@ import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
+    private static final String BATTERY = "battery";
     private FirebaseUser currentUser;
     private TextView heartDisplay;
     private TextView batteryLevelDisplay;
@@ -44,10 +45,10 @@ public class HomeFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         heartDisplay = root.findViewById(R.id.heart_rate_display);
         batteryLevelDisplay = root.findViewById(R.id.battery_level_display);
+
         TextView welcomeText = root.findViewById(R.id.welcome_name);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -57,9 +58,10 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     String name = (String) dataSnapshot.child("name").getValue();
-                    Toast.makeText(getContext(),name,Toast.LENGTH_SHORT).show();
-                    if(name.isEmpty()) name = currentUser.getDisplayName();
-                    welcomeText.setText("Welcome " + name + "!");
+                    if(name != null) {
+                        if (name.isEmpty()) name = currentUser.getDisplayName();
+                        welcomeText.setText("Welcome " + name + "!");
+                    }
                 }
 
                 @Override
@@ -104,6 +106,20 @@ public class HomeFragment extends Fragment {
 
         }
     };*/
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null) {
+            batteryLevelDisplay.setText(savedInstanceState.getString(BATTERY));
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(BATTERY, (String) batteryLevelDisplay.getText());
+    }
 
     @Override
     public void onResume() {

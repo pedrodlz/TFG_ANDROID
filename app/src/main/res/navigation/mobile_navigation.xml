@@ -5,17 +5,30 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_home">
 
+
     <fragment
-        android:id="@+id/navigation_bluetooth"
-        android:name="com.tfg.healthwatch.ui.bluetooth.BluetoothFragment"
-        android:label="@string/title_bluetooth"
-        tools:layout="@layout/fragment_bluetooth" />
+        android:id="@+id/navigation_goals"
+        android:name="com.tfg.healthwatch.ui.GoalsFragment"
+        android:label="@string/title_goals"
+        tools:layout="@layout/fragment_goals" />
+
+    <fragment
+        android:id="@+id/navigation_alerts"
+        android:name="com.tfg.healthwatch.ui.AlertsFragment"
+        android:label="@string/title_alerts"
+        tools:layout="@layout/fragment_alerts" />
 
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.tfg.healthwatch.ui.home.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.tfg.healthwatch.ui.ProfileFragment"
+        android:label="@string/title_profile"
+        tools:layout="@layout/fragment_profile" />
 
     <fragment
         android:id="@+id/navigation_settings"

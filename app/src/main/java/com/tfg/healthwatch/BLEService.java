@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class BLEService extends Service implements SensorEventListener {
+public class BLEService extends Service {
 
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothManager mBluetoothManager;
@@ -63,8 +63,6 @@ public class BLEService extends Service implements SensorEventListener {
     private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
     private BluetoothGatt mBluetoothGatt;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private SensorManager sensorManager;
-    private Sensor mGravity;
     private boolean heartRateNotificationOn = false;
     private boolean batteryNotificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
@@ -99,37 +97,6 @@ public class BLEService extends Service implements SensorEventListener {
 
     public BLEService(){};
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-
-            double loX = event.values[0];
-            double loY = event.values[1];
-            double loZ = event.values[2];
-
-            double loAccelerationReader = Math.sqrt(Math.pow(loX, 2)
-                    + Math.pow(loY, 2)
-                    + Math.pow(loZ, 2));
-
-            DecimalFormat precision = new DecimalFormat("0,00");
-            double ldAccRound = Double.parseDouble(precision.format(loAccelerationReader));
-
-            if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
-                //Do your stuff
-                Log.d("Sensor X",event.values[0]+ "m/s2");
-                Log.d("Sensor Y",event.values[1]+ "m/s2");
-                Log.d("Sensor Z",event.values[2]+ "m/s2");
-            }
-
-        }
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
-    }
-
     /**
      * Class used for the client Binder.  Because we know this service always
      * runs in the same process as its clients, we don't need to deal with IPC.
@@ -149,7 +116,6 @@ public class BLEService extends Service implements SensorEventListener {
         params.addAction(GET_CONNECTED_INTENT);
         this.registerReceiver(receiver,params);
         initialize();
-        startGravitySensor();
         getConnectedDevices();
         getbattery();
         getSteps();
@@ -204,9 +170,6 @@ public class BLEService extends Service implements SensorEventListener {
         super.onDestroy();
         Log.d(TAG,"onDestroy service");
         unregisterReceiver(receiver);
-        if(sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
-            sensorManager.unregisterListener(this,mGravity);
-        }
         stopNotifications();
     }
 
@@ -222,18 +185,6 @@ public class BLEService extends Service implements SensorEventListener {
 
     public void disableBluetooth(){
         mBluetoothAdapter.disable();
-    }
-
-    private void startGravitySensor(){
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-
-        if(sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null){
-            mGravity = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            sensorManager.registerListener(this,mGravity, SensorManager.SENSOR_DELAY_NORMAL);
-        }
-        else{
-            Log.e(TAG,"Gravity sensor is not present");
-        }
     }
 
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {

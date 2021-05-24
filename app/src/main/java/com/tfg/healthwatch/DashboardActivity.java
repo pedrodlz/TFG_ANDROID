@@ -2,6 +2,7 @@ package com.tfg.healthwatch;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -28,14 +29,21 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class DashboardActivity extends AppCompatActivity {
 
-    private static BLEService mService;
-    boolean mBound = false;
+    private static final String TAG = "DashboardActivity";
+    private static BLEService mServiceBLE;
+    private static FallingService mServiceFalling;
+    private Fragment mMyFragment;
+    boolean mBoundBLE = false;
+    boolean mBoundFalling = false;
 
     @Override
     public void onStart() {
         super.onStart();
         // Bind to LocalService
         Intent intent = new Intent(this, BLEService.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+
+        intent = new Intent(this, FallingService.class);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
@@ -44,15 +52,11 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        startService(new Intent(this,BLEService.class));
-
-        //bleService = new BLEService();
-
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_bluetooth, R.id.navigation_home, R.id.navigation_settings)
+                R.id.navigation_goals, R.id.navigation_alerts, R.id.navigation_home, R.id.navigation_profile, R.id.navigation_settings)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -60,9 +64,24 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        startService(new Intent(this,BLEService.class));
+        startService(new Intent(this,FallingService.class));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopService(new Intent(this,BLEService.class));
+        stopService(new Intent(this,FallingService.class));
+    }
+
+    @Override
     public void onDestroy(){
         super.onDestroy();
         stopService(new Intent(this,BLEService.class));
+        stopService(new Intent(this,FallingService.class));
     }
 
 
@@ -83,18 +102,27 @@ public class DashboardActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            BLEService.LocalBinder binder = (BLEService.LocalBinder) service;
-            mService = binder.getService();
-            mBound = true;
+            String name = className.getShortClassName();
+            if(name.equals(".BLEService")){
+                BLEService.LocalBinder binder = (BLEService.LocalBinder) service;
+                mServiceBLE = binder.getService();
+                mBoundBLE = true;
+            }
+            else if(name.equals(".FallingService")){
+                FallingService.LocalBinder binder = (FallingService.LocalBinder) service;
+                mServiceFalling = binder.getService();
+                mBoundFalling = true;
+            }
+
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
+            mBoundBLE = false;
         }
     };
 
     public static BLEService getBleService(){
-        return mService;
+        return mServiceBLE;
     }
 }

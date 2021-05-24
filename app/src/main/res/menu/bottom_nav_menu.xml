@@ -2,14 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_bluetooth"
-        android:icon="@drawable/ic_baseline_bluetooth_24"
-        android:title="@string/title_bluetooth" />
+        android:id="@+id/navigation_goals"
+        android:icon="@drawable/ic_goals"
+        android:title="@string/title_goals" />
+
+    <item
+        android:id="@+id/navigation_alerts"
+        android:icon="@drawable/ic_alert_icon"
+        android:title="@string/title_alerts" />
 
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_home_black_24dp"
         android:title="@string/title_home" />
+
+    <item
+        android:id="@+id/navigation_profile"
+        android:icon="@drawable/ic_baseline_person_24"
+        android:title="@string/title_profile" />
 
     <item
         android:id="@+id/navigation_settings"

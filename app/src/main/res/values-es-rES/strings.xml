@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">HealthWatch</string>
+    <string name="title_home">Home</string>
+    <string name="title_bluetooth">Bluetooth</string>
+    <string name="title_settings">Ajustes</string>
+    <string name="bluetooth_toggle">Activar/Desactivar Bluetooth</string>
+    <string name="connected_devices">Dispositivos conectados</string>
+    <string name="search_devices">Buscar</string>
+    <string name="action_sign_in">Iniciar sesión</string>
+    <string name="action_sign_up">Crear cuenta</string>
+    <string name="not_registered">¿No tiene una cuenta?</string>
+    <string name="welcome">¡Bienvenido!</string>
+    <string name="heart_rate">Pulsaciones:</string>
+    <string name="battery_level">Batería:</string>
+    <string name="prompt_password">Contraseña</string>
+    <string name="prompt_email">Email</string>
+    <string name="found_devices">Dispositivos encontrados</string>
+    <string name="title_activity_login">Login</string>
+    <string name="title_profile">Perfil</string>
+    <string name="title_goals">Objetivos</string>
+    <string name="title_alerts">Alertas</string>
+</resources>

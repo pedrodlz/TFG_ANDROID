@@ -66,7 +66,6 @@ public class LoginActivity extends AppCompatActivity {
         signUpButton = findViewById(R.id.sign_up_text);
         signInButton.setEnabled(true);
         errorText = findViewById(R.id.error_text_sign_in);
-        final ProgressBar loadingProgressBar = findViewById(R.id.loading);
         googleButton = findViewById(R.id.sign_in_button);
         googleButton.setSize(SignInButton.SIZE_STANDARD);
         usernameEditText = findViewById(R.id.sign_in_username);
