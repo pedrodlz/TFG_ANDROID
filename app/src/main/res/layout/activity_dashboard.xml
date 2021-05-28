@@ -32,5 +32,32 @@
         app:layout_constraintVertical_bias="0.0"
         app:navGraph="@navigation/mobile_navigation" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        app:layout_constraintBottom_toTopOf="@+id/nav_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/result_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginRight="15dp"
+            android:layout_toLeftOf="@id/mic_button"
+            android:hint="Tap to Speak"
+            android:padding="10dp" />
+
+        <ImageView
+            android:id="@+id/mic_button"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:backgroundTint="#F9F8FA"
+            android:paddingRight="10dp"
+            android:src="@drawable/ic_baseline_mic_off_24" />
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

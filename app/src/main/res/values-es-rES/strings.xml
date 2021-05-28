@@ -20,4 +20,9 @@
     <string name="title_profile">Perfil</string>
     <string name="title_goals">Objetivos</string>
     <string name="title_alerts">Alertas</string>
+    <string name="fall_alert">Caídas</string>
+    <string name="weight_alert">Peso</string>
+    <string name="heart_rate_alert">Pulsaciones</string>
+    <string name="battery_alert">Batería</string>
+    <string name="phone_alert">Numero Emergencia</string>
 </resources>

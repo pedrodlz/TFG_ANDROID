@@ -1,20 +1,217 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.AlertsFragment"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:gravity="center_horizontal">
 
-    <TextView
-        android:id="@+id/item_number"
+    <CheckBox
+        android:id="@+id/falls_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+        android:layout_marginTop="25dp"
+        android:text="@string/fall_alert"
+        android:button="@null"
+        android:drawableRight="?android:attr/listChoiceIndicatorMultiple"/>
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+    <LinearLayout
+        android:id="@+id/weight_alert"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_alignParentEnd="true"
+        android:gravity="center_vertical"
+        android:background="@drawable/alert_item"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="147dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/hind"
+            android:paddingStart="20dp"
+            android:text="@string/weight_alert"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+
+        <EditText
+            android:id="@+id/weight_edit_text"
+            android:layout_width="168dp"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:hint="Introduce el peso"
+            android:padding="5dp"
+            android:textColor="@color/black" />
+
+
+        <CheckBox
+            android:id="@+id/weight_check_box"
+            android:layout_width="37dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/heart_rate_alert"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_below="@+id/weight_alert"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:gravity="center_vertical"
+        android:background="@drawable/alert_item"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginEnd="-2dp"
+        android:layout_marginRight="-2dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="147dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/hind"
+            android:paddingStart="20dp"
+            android:text="@string/heart_rate_alert"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+
+        <EditText
+            android:id="@+id/heart_rate_edit_text"
+            android:layout_width="168dp"
+            android:layout_height="30dp"
+            android:background="@color/white"
+            android:hint="Introduce pulsacio"
+            android:padding="5dp"
+            android:textColor="@color/black" />
+
+
+        <CheckBox
+            android:id="@+id/heart_rate_checkbox"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/battery_alert"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_below="@+id/heart_rate_alert"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:gravity="center_vertical"
+        android:background="@drawable/alert_item"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginEnd="-2dp"
+        android:layout_marginRight="-2dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="147dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/hind"
+            android:paddingStart="20dp"
+            android:text="@string/battery_alert"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+
+        <EditText
+            android:id="@+id/battery_edit_text"
+            android:layout_width="168dp"
+            android:layout_height="30dp"
+            android:background="@color/white"
+            android:hint="Introduce el nivel"
+            android:padding="5dp"
+            android:textColor="@color/black" />
+
+
+        <CheckBox
+            android:id="@+id/battery_checkbox"
+            android:layout_width="34dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/phone_alert"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:layout_below="@+id/battery_alert"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="35dp"
+        android:layout_marginEnd="-2dp"
+        android:layout_marginRight="-2dp"
+        android:background="@drawable/alert_item"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="147dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/hind"
+            android:paddingStart="20dp"
+            android:text="@string/phone_alert"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+
+        <EditText
+            android:id="@+id/phone_edit_text"
+            android:layout_width="168dp"
+            android:layout_height="30dp"
+            android:background="@color/white"
+            android:hint="Introduce numero"
+            android:padding="5dp"
+            android:textColor="@color/black" />
+
+
+        <CheckBox
+            android:id="@+id/phone_checkbox"
+            android:layout_width="34dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+
+    <LinearLayout
+        android:id="@+id/sos_layout"
+        android:layout_width="194dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="35dp"
+        android:background="@drawable/sos_layout"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="35dp">
+
+        <ImageView
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:background="@drawable/ic_phone_svgrepo_com"
+            android:backgroundTint="@color/forth" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:fontFamily="@font/hind_bold"
+            android:paddingStart="15dp"
+            android:text="S.O.S"
+            android:textColor="@color/forth"
+            android:textSize="25sp" />
+    </LinearLayout>
+
 </LinearLayout>
+
