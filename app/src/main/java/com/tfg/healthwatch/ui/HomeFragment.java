@@ -1,4 +1,4 @@
-package com.tfg.healthwatch.ui.home;
+package com.tfg.healthwatch.ui;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

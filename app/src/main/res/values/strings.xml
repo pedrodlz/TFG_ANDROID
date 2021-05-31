@@ -38,4 +38,5 @@
     <string name="heart_rate_alert">Heart Rate</string>
     <string name="battery_alert">Battery</string>
     <string name="phone_alert">Emergency Number</string>
+    <string name="title_diagnose">Diagnose</string>
 </resources>

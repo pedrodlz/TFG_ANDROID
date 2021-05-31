@@ -20,9 +20,39 @@
 
     <fragment
         android:id="@+id/navigation_home"
-        android:name="com.tfg.healthwatch.ui.home.HomeFragment"
+        android:name="com.tfg.healthwatch.ui.HomeFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_diagnose"
+        android:name="com.tfg.healthwatch.ui.DiagnoseFragment"
+        android:label="@string/title_diagnose"
+        tools:layout="@layout/fragment_diagnose" >
+        <action
+            android:id="@+id/action_navigation_diagnose_to_navigation_tests"
+            app:destination="@id/navigation_tests"
+            app:popUpTo="@id/navigation_diagnose" >
+            <argument
+                android:name="type"
+                android:defaultValue="meaning_cloud" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_tests"
+        android:name="com.tfg.healthwatch.ui.TestsFragment"
+        android:label="Tests"
+        tools:layout="@layout/fragment_tests" >
+        <action
+            android:id="@+id/action_navigation_tests_to_navigation_diagnose"
+            app:popUpTo="@id/navigation_tests"
+            app:destination="@id/navigation_diagnose" />
+        <argument
+            android:name="type"
+            app:argType="string"
+            android:defaultValue="error" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_profile"
@@ -34,5 +64,9 @@
         android:id="@+id/navigation_settings"
         android:name="com.tfg.healthwatch.ui.settings.SettingsFragment"
         android:label="@string/title_settings"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_navigation_settings_to_navigation_profile"
+            app:destination="@id/navigation_profile" />
+    </fragment>
 </navigation>

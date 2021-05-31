@@ -25,4 +25,5 @@
     <string name="heart_rate_alert">Pulsaciones</string>
     <string name="battery_alert">Batería</string>
     <string name="phone_alert">Numero Emergencia</string>
+    <string name="title_diagnose">Diagnóstico</string>
 </resources>

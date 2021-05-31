@@ -380,34 +380,38 @@ public class BLEService extends Service {
 
     public void getbattery() {
 
-        BluetoothGattService batteryService = mBluetoothGatt.getService(BATTERY_SERVICE_UUID);
-        if(batteryService == null) {
-            Log.d(TAG, "Battery service not found!");
-            return;
-        }
+        if(mBluetoothGatt != null){
+            BluetoothGattService batteryService = mBluetoothGatt.getService(BATTERY_SERVICE_UUID);
+            if(batteryService == null) {
+                Log.d(TAG, "Battery service not found!");
+                return;
+            }
 
-        BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(BATTERY_LEVEL_UUID);
-        if(batteryLevel == null) {
-            Log.d(TAG, "Battery level not found!");
-            return;
+            BluetoothGattCharacteristic batteryLevel = batteryService.getCharacteristic(BATTERY_LEVEL_UUID);
+            if(batteryLevel == null) {
+                Log.d(TAG, "Battery level not found!");
+                return;
+            }
+            mBluetoothGatt.readCharacteristic(batteryLevel);
         }
-        mBluetoothGatt.readCharacteristic(batteryLevel);
     }
 
     public void getSteps(){
         Log.d(TAG,UUID_SERVICE_MIBAND_SERVICE.toString());
-        BluetoothGattService miBandService = mBluetoothGatt.getService(UUID_SERVICE_MIBAND_SERVICE);
-        if(miBandService == null) {
-            Log.d(TAG, "miBandService service not found!");
-            return;
-        }
+        if(mBluetoothGatt != null){
+            BluetoothGattService miBandService = mBluetoothGatt.getService(UUID_SERVICE_MIBAND_SERVICE);
+            if(miBandService == null) {
+                Log.d(TAG, "miBandService service not found!");
+                return;
+            }
 
-        BluetoothGattCharacteristic stepsCharacteristic = miBandService.getCharacteristic(UUID_CHARACTERISTIC_REALTIME_STEPS);
-        if(stepsCharacteristic == null) {
-            Log.d(TAG, "stepsCharacteristic not found!");
-            return;
+            BluetoothGattCharacteristic stepsCharacteristic = miBandService.getCharacteristic(UUID_CHARACTERISTIC_REALTIME_STEPS);
+            if(stepsCharacteristic == null) {
+                Log.d(TAG, "stepsCharacteristic not found!");
+                return;
+            }
+            mBluetoothGatt.readCharacteristic(stepsCharacteristic);
         }
-        mBluetoothGatt.readCharacteristic(stepsCharacteristic);
     }
 
     public List<BluetoothGattService> getSupportedGattServices() {

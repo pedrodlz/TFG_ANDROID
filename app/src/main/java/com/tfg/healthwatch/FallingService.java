@@ -45,10 +45,15 @@ public class FallingService extends Service implements SensorEventListener {
         userAlerts.child("fallingSensor").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String checked = snapshot.child("checked").getValue().toString();
 
-                if(!checked.isEmpty()) sensorActivated = (Boolean) snapshot.child("checked").getValue();
+                if(snapshot.child("checked").getValue() != null){
+                    String checked = snapshot.child("checked").getValue().toString();
+
+                    if(!checked.isEmpty()) sensorActivated = (Boolean) snapshot.child("checked").getValue();
+                    else sensorActivated=false;
+                }
                 else sensorActivated=false;
+
             }
 
             @Override

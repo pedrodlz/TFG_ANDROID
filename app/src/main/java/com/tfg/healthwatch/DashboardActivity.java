@@ -74,12 +74,12 @@ public class DashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
-        mMicButton = findViewById(R.id.mic_button);
-        mResultText = findViewById(R.id.result_text);
+        /*mMicButton = findViewById(R.id.mic_button);
+        mResultText = findViewById(R.id.result_text);*/
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_goals, R.id.navigation_alerts, R.id.navigation_home, R.id.navigation_profile, R.id.navigation_settings)
+                R.id.navigation_goals, R.id.navigation_alerts, R.id.navigation_home, R.id.navigation_diagnose, R.id.navigation_settings)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -88,11 +88,13 @@ public class DashboardActivity extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
             //checkPermission();
 
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+        /*speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
 
         final Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+
+        Log.d(TAG,"LOCALE:"+ Locale.getDefault().getLanguage());
 
         speechRecognizer.setRecognitionListener(new RecognitionListener() {
 
@@ -165,7 +167,7 @@ public class DashboardActivity extends AppCompatActivity {
 
                 return false;
             }
-        });
+        });*/
     }
 
     private void checkPermission() {

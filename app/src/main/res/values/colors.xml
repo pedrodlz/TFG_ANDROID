@@ -7,6 +7,7 @@
     <color name="accent">#E63946</color>
     <color name="custom_dark_grey">#474747</color>
     <color name="custom_light_grey">#E6E6E6</color>
+    <color name="correct">#1CB767</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
