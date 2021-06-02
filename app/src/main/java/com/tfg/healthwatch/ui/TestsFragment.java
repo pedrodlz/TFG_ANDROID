@@ -1,17 +1,29 @@
 package com.tfg.healthwatch.ui;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,8 +53,14 @@ public class TestsFragment extends Fragment {
     private static String TAG = "TestFragment";
     private FirebaseUser currentUser;
     private DatabaseReference testData;
+    private DatabaseReference responseData;
     private String language;
     private ArrayList questions;
+    private TextView questionText, microphoneStatus;
+    private EditText responseText;
+    private ImageView cancelButton, microphoneButton, saveButton;
+    private Integer currentQuestion = 0;
+    private SpeechRecognizer speechRecognizer;
 
     public TestsFragment() {
         // Required empty public constructor
@@ -74,47 +92,201 @@ public class TestsFragment extends Fragment {
                 currentUser = FirebaseAuth.getInstance().getCurrentUser();
                 language = Locale.getDefault().getLanguage();
                 testData = FirebaseDatabase.getInstance().getReference().child("Tests");
+                responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid());
+                DatabaseReference table = testData.child("error").child(language);;
                 switch(mType){
                     case "energy":
-                        testData = testData.child("energy").child(language);
-
-                        testData.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                String value = snapshot.child("0").getValue().toString();
-
-                                Log.d(TAG, value);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-
+                        table = testData.child("energy").child(language);
                         break;
                     case "habit":
+                        table = testData.child("habit").child(language);
                         break;
                     case "goal":
                         break;
                     default:
                         Log.e(TAG,"Error getting test type");
-
                 }
+
+                table.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        questions = new ArrayList<String>();
+
+                        for (DataSnapshot child: snapshot.getChildren()) {
+                            String post = child.getValue().toString();
+                            Log.e("Value " ,post);
+                            questions.add(post);
+                        }
+
+                        try {
+                            nextQuestion();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_tests, container, false);
 
-        TextView testText = root.findViewById(R.id.test_text);
+        questionText = root.findViewById(R.id.test_text);
+        microphoneStatus = root.findViewById(R.id.microphone_status);
+        responseText = root.findViewById(R.id.response_text);
+        cancelButton = root.findViewById(R.id.cancel_test_button);
+        microphoneButton = root.findViewById(R.id.microphone_response_button);
+        saveButton = root.findViewById(R.id.save_response_button);
 
-        testText.setText(mType);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    saveResponse();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        checkPermission();
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getActivity());
+
+        final Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+                microphoneStatus.setText("Escuchando...");
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+
+            }
+
+            @Override
+            public void onError(int error) {
+                //microphoneButton.setImageResource(R.drawable.ic_baseline_mic_off_24);
+                Log.e(TAG, String.valueOf(error));
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                //microphoneButton.setImageResource(R.drawable.ic_baseline_mic_off_24);
+                ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+
+                String result = data.get(0);
+                responseText.setText(result);
+                microphoneStatus.setText("");
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+
+            }
+        });
+
+        microphoneButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP){
+                    speechRecognizer.stopListening();
+                }
+                if (event.getAction() == MotionEvent.ACTION_DOWN){
+                    //microphoneButton.setImageResource(R.drawable.ic_baseline_mic_24);
+                    speechRecognizer.startListening(speechRecognizerIntent);
+                }
+
+                return false;
+            }
+        });
 
         return root;
+    }
+
+    private void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ActivityCompat.requestPermissions(getActivity(),new String[]{
+                    Manifest.permission.RECORD_AUDIO
+            },1);
+        }
+    }
+
+    private void nextQuestion() throws Exception {
+        if(mType != "error"){
+            // Show next
+            if(currentQuestion < questions.size()){
+                questionText.setText(questions.get(currentQuestion).toString());
+            }
+            else{
+                //Exit test
+                Toast.makeText(getContext(),"Test finished!",Toast.LENGTH_SHORT).show();
+            }
+        }
+        else{
+            throw new Exception("Type not selected");
+        }
+    }
+
+    private void saveResponse() throws Exception {
+        if(mType != "error"){
+            if(currentQuestion < questions.size()){
+                String questionIndex = currentQuestion+"";
+                String response = responseText.getText().toString();
+                responseData.child(mType)
+                        .child(questionIndex)
+                        .setValue(response)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                responseText.setText("");
+                                currentQuestion++;
+                                try {
+                                    nextQuestion();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+            }
+        }
+        else{
+            throw new Exception("Type not selected");
+        }
     }
 }

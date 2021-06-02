@@ -35,7 +35,8 @@
             app:popUpTo="@id/navigation_diagnose" >
             <argument
                 android:name="type"
-                android:defaultValue="meaning_cloud" />
+                app:argType="string"
+                android:defaultValue="error" />
         </action>
     </fragment>
 
@@ -48,10 +49,6 @@
             android:id="@+id/action_navigation_tests_to_navigation_diagnose"
             app:popUpTo="@id/navigation_tests"
             app:destination="@id/navigation_diagnose" />
-        <argument
-            android:name="type"
-            app:argType="string"
-            android:defaultValue="error" />
     </fragment>
 
     <fragment
