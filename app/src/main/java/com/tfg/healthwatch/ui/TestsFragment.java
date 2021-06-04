@@ -23,6 +23,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,7 +45,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -55,7 +74,7 @@ public class TestsFragment extends Fragment {
     private DatabaseReference testData;
     private DatabaseReference responseData;
     private String language;
-    private ArrayList questions;
+    private ArrayList questions = new ArrayList();
     private TextView questionText, microphoneStatus;
     private EditText responseText;
     private ImageView cancelButton, microphoneButton, saveButton;
@@ -92,44 +111,50 @@ public class TestsFragment extends Fragment {
                 currentUser = FirebaseAuth.getInstance().getCurrentUser();
                 language = Locale.getDefault().getLanguage();
                 testData = FirebaseDatabase.getInstance().getReference().child("Tests");
-                responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid());
+
+                LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
+                String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
+
+                responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid()).child(stringDate);
                 DatabaseReference table = testData.child("error").child(language);;
                 switch(mType){
                     case "energy":
-                        table = testData.child("energy").child(language);
-                        break;
                     case "habit":
-                        table = testData.child("habit").child(language);
+                        if(mType == "energy") table = testData.child("energy").child(language);
+                        else if(mType == "habit") table = testData.child("habit").child(language);
+
+                        table.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                questions = new ArrayList<String>();
+
+                                for (DataSnapshot child: snapshot.getChildren()) {
+                                    String post = child.getValue().toString();
+                                    Log.e("Value " ,post);
+                                    questions.add(post);
+                                }
+
+                                try {
+                                    nextQuestion();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+
                         break;
                     case "goal":
+                        break;
+                    case "meaning":
                         break;
                     default:
                         Log.e(TAG,"Error getting test type");
                 }
-
-                table.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        questions = new ArrayList<String>();
-
-                        for (DataSnapshot child: snapshot.getChildren()) {
-                            String post = child.getValue().toString();
-                            Log.e("Value " ,post);
-                            questions.add(post);
-                        }
-
-                        try {
-                            nextQuestion();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
             }
         }
     }
@@ -236,6 +261,14 @@ public class TestsFragment extends Fragment {
             }
         });
 
+        if (mType == "meaning") {
+            try {
+                nextQuestion();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         return root;
     }
 
@@ -252,6 +285,9 @@ public class TestsFragment extends Fragment {
             // Show next
             if(currentQuestion < questions.size()){
                 questionText.setText(questions.get(currentQuestion).toString());
+            }
+            else if(mType == "meaning"){
+                questionText.setText("Cuentame como te sientes");
             }
             else{
                 //Exit test
@@ -284,9 +320,46 @@ public class TestsFragment extends Fragment {
                             }
                         });
             }
+            else if(mType == "meaning"){
+                sendDataToApiMeaning();
+            }
         }
         else{
             throw new Exception("Type not selected");
         }
+    }
+
+    private void sendDataToApiMeaning(){
+        // Instantiate the RequestQueue.
+        try{
+            RequestQueue queue = Volley.newRequestQueue(getContext());
+            String url ="https://api.meaningcloud.com/sentiment-2.1?key=74833d8cd376c37a060366a8c88b529c&lang="+language;
+            String textToAnalyze = responseText.getText().toString();
+            url += "&txt="+textToAnalyze;
+
+            // Request a string response from the provided URL.
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String  response) {
+                            // Display the first 500 characters of the response string.
+                            Log.i("VOLLEY", response);
+
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            microphoneStatus.setText("That didn't work!");
+                            Log.e("VOLLEY", error.toString());
+
+                        }
+            });
+
+            // Add the request to the RequestQueue.
+            queue.add(stringRequest);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 }

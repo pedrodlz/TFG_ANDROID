@@ -98,7 +98,7 @@ public class FallingService extends Service implements SensorEventListener {
                     + Math.pow(loY, 2)
                     + Math.pow(loZ, 2));
 
-            DecimalFormat precision = new DecimalFormat("0,00");
+            /*DecimalFormat precision = new DecimalFormat("0,00");
             double ldAccRound = Double.parseDouble(precision.format(loAccelerationReader));
 
             if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
@@ -106,7 +106,7 @@ public class FallingService extends Service implements SensorEventListener {
                 Log.d("Sensor X",event.values[0]+ "m/s2");
                 Log.d("Sensor Y",event.values[1]+ "m/s2");
                 Log.d("Sensor Z",event.values[2]+ "m/s2");
-            }
+            }*/
 
         }
     }

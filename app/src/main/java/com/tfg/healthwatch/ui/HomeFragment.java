@@ -31,12 +31,17 @@ import com.tfg.healthwatch.DashboardActivity;
 import com.tfg.healthwatch.R;
 import com.tfg.healthwatch.ui.bluetooth.BluetoothObject;
 
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
 
     private static final String BATTERY = "battery";
+    private static final String TAG = "HomeFragment";
     private FirebaseUser currentUser;
+    private DatabaseReference heartRateTable;
     private TextView heartDisplay;
     private TextView batteryLevelDisplay;
     private Button mAddButton;
@@ -48,31 +53,31 @@ public class HomeFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
         heartDisplay = root.findViewById(R.id.heart_rate_display);
         batteryLevelDisplay = root.findViewById(R.id.battery_level_display);
-
-        TextView welcomeText = root.findViewById(R.id.welcome_name);
-
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            DatabaseReference user = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid());
-            user.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    String name = (String) dataSnapshot.child("name").getValue();
-                    if(name != null) {
-                        if (name.isEmpty()) name = currentUser.getDisplayName();
-                        welcomeText.setText("Welcome " + name + "!");
-                    }
-                }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    System.out.println("The read failed: " + databaseError.getCode());
+        LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
+        String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
+
+        heartRateTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid()).child(stringDate);
+
+        heartRateTable.child("Average Heart Rate").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String value = snapshot.getValue().toString();
+                    Log.d(TAG, "Average heart rate today: " + value);
                 }
-            });
-            // User is signed in
-        } else {
-            // No user is signed in
-        }
+                else{
+                    calcAverageHeartRate();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
         return root;
     }
 
@@ -93,19 +98,36 @@ public class HomeFragment extends Fragment {
         }
     };
 
-    /*private BroadcastReceiver receiver = new BroadcastReceiver() {
+    private void calcAverageHeartRate(){
+        heartRateTable.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Integer numHeartRates = 0;
+                Double averageHeartRate = 0.00;
 
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String heartRate = intent.getExtras().get("heartRate").toString();
+                for (DataSnapshot child: snapshot.child("Heart Rates").getChildren()) {
+                    Double rate = child.getValue(Double.class);
+                    numHeartRates++;
+                    averageHeartRate += rate;
+                    Log.d("Value " ,rate+"");
+                }
+                Log.d(TAG,"Total heart Rates: " + numHeartRates+"");
+                averageHeartRate = averageHeartRate / numHeartRates;
+                Log.d(TAG,"Average heart rate today: "+ averageHeartRate);
 
-            heartDisplay.setText(heartRate);
+                if(!averageHeartRate.isNaN()){
+                    DecimalFormat df2 = new DecimalFormat("#.##");
+                    heartRateTable.child("Average Heart Rate").setValue(df2.format(averageHeartRate));
+                }
+            }
 
-            //or
-            //exercises = ParseJSON.ChallengeParseJSON(intent.getStringExtra(MY_KEY));
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-        }
-    };*/
+            }
+        });
+
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {

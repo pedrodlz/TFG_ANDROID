@@ -12,8 +12,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.tfg.healthwatch.R;
 import com.tfg.healthwatch.ui.dummy.DummyContent;
+
+import java.util.Locale;
 
 /**
  * A fragment representing a list of Items.
@@ -24,6 +30,8 @@ public class GoalsFragment extends Fragment {
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
     private int mColumnCount = 1;
+    private FirebaseUser currentUser;
+    private DatabaseReference goalTable;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -45,6 +53,9 @@ public class GoalsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        goalTable = FirebaseDatabase.getInstance().getReference().child("Goals");
 
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
