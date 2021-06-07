@@ -26,4 +26,10 @@
     <string name="battery_alert">Batería</string>
     <string name="phone_alert">Numero Emergencia</string>
     <string name="title_diagnose">Diagnóstico</string>
+    <string name="goal_pick_list">Elige el tipo</string>
+    <string name="lose_weight">Perder peso</string>
+    <string name="walk_kilometers">Andar kilometros</string>
+    <string name="walk_steps">Andar pasos</string>
+    <string name="burn_calories">Perder calorías</string>
+    <string name="custom">Personalizado</string>
 </resources>

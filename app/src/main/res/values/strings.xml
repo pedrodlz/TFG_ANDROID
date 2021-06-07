@@ -39,4 +39,17 @@
     <string name="battery_alert">Battery</string>
     <string name="phone_alert">Emergency Number</string>
     <string name="title_diagnose">Diagnose</string>
+    <string name="goal_pick_list">Pick a type</string>
+    <string name="lose_weight">Lose weight</string>
+    <string name="walk_kilometers">Walk kilometers</string>
+    <string name="walk_steps">Walk steps</string>
+    <string name="burn_calories">Burn calories</string>
+    <string name="custom">Custom</string>
+    <string-array name="goals_elements_list">
+        <item>@string/lose_weight</item>
+        <item>@string/walk_kilometers</item>
+        <item>@string/walk_steps</item>
+        <item>@string/burn_calories</item>
+        <item>@string/custom</item>
+    </string-array>
 </resources>

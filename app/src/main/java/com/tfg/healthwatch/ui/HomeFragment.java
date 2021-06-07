@@ -67,9 +67,6 @@ public class HomeFragment extends Fragment {
                     String value = snapshot.getValue().toString();
                     Log.d(TAG, "Average heart rate today: " + value);
                 }
-                else{
-                    calcAverageHeartRate();
-                }
             }
 
             @Override
@@ -97,37 +94,6 @@ public class HomeFragment extends Fragment {
             }
         }
     };
-
-    private void calcAverageHeartRate(){
-        heartRateTable.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Integer numHeartRates = 0;
-                Double averageHeartRate = 0.00;
-
-                for (DataSnapshot child: snapshot.child("Heart Rates").getChildren()) {
-                    Double rate = child.getValue(Double.class);
-                    numHeartRates++;
-                    averageHeartRate += rate;
-                    Log.d("Value " ,rate+"");
-                }
-                Log.d(TAG,"Total heart Rates: " + numHeartRates+"");
-                averageHeartRate = averageHeartRate / numHeartRates;
-                Log.d(TAG,"Average heart rate today: "+ averageHeartRate);
-
-                if(!averageHeartRate.isNaN()){
-                    DecimalFormat df2 = new DecimalFormat("#.##");
-                    heartRateTable.child("Average Heart Rate").setValue(df2.format(averageHeartRate));
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {

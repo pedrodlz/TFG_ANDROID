@@ -31,6 +31,8 @@ import android.util.Log;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -62,10 +64,13 @@ public class BLEService extends Service {
     private ArrayList<String> scannedStringArray = new ArrayList<String>();
     private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
     private BluetoothGatt mBluetoothGatt;
-    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseUser currentUser;
     private boolean heartRateNotificationOn = false;
     private boolean batteryNotificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
+    private DatabaseReference activityTable;
+    private Double currentTotalHeartRate = 0.00;
+    private int totalHeartRates = 0;
     private String TAG = "BLEService";
     private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
     private static String CONNECTED_LIST_INTENT = "com.tfg.healthwatch.CONNECTED_LIST";
@@ -156,6 +161,13 @@ public class BLEService extends Service {
         if(!mBluetoothAdapter.isEnabled()){
             requestBluetooth();
         }
+
+        LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
+        String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
+
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        activityTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid()).child(stringDate);
+        getAvgHeartRate();
 
         return true;
     }
@@ -325,17 +337,9 @@ public class BLEService extends Service {
             Log.d("distance:", distance+"");
             Log.d("calories:", calories+"");
 
-            FirebaseUser user = mAuth.getCurrentUser();
-            String userId = user.getUid();
-
-            LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
-            String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
-
-            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Activity").child(userId).child(stringDate);
-
-            ref.child("Steps").setValue(steps);
-            ref.child("Distance").setValue(distance);
-            ref.child("Calories").setValue(calories);
+            activityTable.child("Steps").setValue(steps);
+            activityTable.child("Distance").setValue(distance);
+            activityTable.child("Calories").setValue(calories);
         }
 
     }
@@ -394,6 +398,44 @@ public class BLEService extends Service {
             }
             mBluetoothGatt.readCharacteristic(batteryLevel);
         }
+    }
+
+    public void getAvgHeartRate(){
+
+        activityTable.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.child("Total Heart Rate").exists() && snapshot.child("Heart Rates").exists()){
+                    currentTotalHeartRate = snapshot.child("Total Heart Rate").getValue(Double.class);
+                    totalHeartRates = (int) snapshot.child("Heart Rates").getChildrenCount();
+                }
+                else if(!snapshot.child("Total Heart Rate").exists() && snapshot.child("Heart Rates").exists()){
+                    totalHeartRates = (int) snapshot.child("Heart Rates").getChildrenCount();
+                    currentTotalHeartRate = 0.00;
+                    Double avgHeartRate = 0.00;
+
+                    for (DataSnapshot child: snapshot.child("Heart Rates").getChildren()) {
+                        Double rate = child.getValue(Double.class);
+                        currentTotalHeartRate += rate;
+                    }
+                    Log.d(TAG,"Total heart Rates: " + totalHeartRates+"");
+                    avgHeartRate = currentTotalHeartRate / totalHeartRates;
+                    Log.d(TAG,"Average heart rate today: "+ currentTotalHeartRate);
+
+                    activityTable.child("Total Heart Rate").setValue(currentTotalHeartRate);
+                    if(!avgHeartRate.isNaN()){
+                        DecimalFormat df2 = new DecimalFormat("#.##");
+                        activityTable.child("Average Heart Rate").setValue(df2.format(avgHeartRate));
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     public void getSteps(){
@@ -501,15 +543,18 @@ public class BLEService extends Service {
 
             Integer heartRate = characteristic.getIntValue(format,1);
 
-            FirebaseUser user = mAuth.getCurrentUser();
-            String userId = user.getUid();
+            if(!currentTotalHeartRate.isNaN()){
+                currentTotalHeartRate += heartRate;
+            }
+            else currentTotalHeartRate = heartRate + 0.00;
 
-            LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
-            String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
+            totalHeartRates++;
 
-            DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Activity").child(userId).child(stringDate).child("Heart Rates");
+            Double avgHeartRates = currentTotalHeartRate / totalHeartRates;
 
-            ref.push().setValue(heartRate);
+            activityTable.child("Heart Rates").push().setValue(heartRate);
+            activityTable.child("Total Heart Rate").setValue(currentTotalHeartRate);
+            activityTable.child("Average Heart Rate").setValue(avgHeartRates);
 
             sendBroadcast(new Intent("com.tfg.healthwatch.HEART_RATE").putExtra("heartRate",heartRate.toString()));
 
