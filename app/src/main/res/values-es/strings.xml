@@ -30,6 +30,13 @@
     <string name="lose_weight">Perder peso</string>
     <string name="walk_kilometers">Andar kilometros</string>
     <string name="walk_steps">Andar pasos</string>
-    <string name="burn_calories">Perder calorías</string>
+    <string name="burn_calories">Quemar calorías</string>
     <string name="custom">Personalizado</string>
+    <string name="theme_string">Tema</string>
+    <string name="language_string">Idioma</string>
+    <string name="about_string">Acerca de</string>
+    <string name="about_information_text">Esta aplicación ha sido desarrollada por Pedro Domínguez López como parte del Trabajo de Fin de Grado en Ingeniería Informática en la Universidad de Granada en el 2021</string>
+    <string name="spanish">Español</string>
+    <string name="english">Inglés</string>
+    <string name="log_out">Cerrar sesión</string>
 </resources>
