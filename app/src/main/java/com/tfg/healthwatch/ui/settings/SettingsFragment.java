@@ -5,8 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -84,15 +86,39 @@ public class SettingsFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int which) {
                         String option = languages[which];
 
-                        /*Locale myLocale = new Locale(lang);
-                        Resources res = getResources();
-                        DisplayMetrics dm = res.getDisplayMetrics();
-                        Configuration conf = res.getConfiguration();
-                        conf.setLocale(myLocale);
-                        res.updateConfiguration(conf, dm);
-                        Intent refresh = new Intent(this, AndroidLocalize.class);
-                        finish();
-                        startActivity(refresh);*/
+                        if(!option.isEmpty()){
+
+                            if(option.equals(getString(R.string.english))){
+                                option = "en";
+                            }
+                            else if(option.equals(getString(R.string.spanish))){
+                                option = "es";
+                            }
+                            else option = "-1";
+
+                            if(!option.equals("-1")){
+                                Log.d("OPTION CORRECT: ", option);
+                                Locale locale = new Locale(option);
+                                Locale.setDefault(locale);
+
+                                Resources resources = getContext().getResources();
+                                Configuration configuration = resources.getConfiguration();
+                                configuration.setLocale(locale);
+
+                                getContext().createConfigurationContext(configuration);
+                                resources.updateConfiguration(configuration, resources.getDisplayMetrics());
+
+                                //Reload fragment
+                                if (getParentFragmentManager() != null) {
+
+                                    getParentFragmentManager()
+                                            .beginTransaction()
+                                            .detach(SettingsFragment.this)
+                                            .attach(SettingsFragment.this)
+                                            .commit();
+                                }
+                            }
+                        }
                     }
                 });
                 builder.show();

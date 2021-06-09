@@ -5,7 +5,7 @@
     <string name="title_bluetooth">Bluetooth</string>
     <string name="title_settings">Ajustes</string>
     <string name="bluetooth_toggle">Activar/Desactivar Bluetooth</string>
-    <string name="connected_devices">Dispositivos conectados</string>
+    <string name="connected_devices">Pulsera</string>
     <string name="search_devices">Buscar</string>
     <string name="action_sign_in">Iniciar sesión</string>
     <string name="action_sign_up">Crear cuenta</string>

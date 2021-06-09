@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -51,6 +53,7 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_home, container, false);
+
         heartDisplay = root.findViewById(R.id.heart_rate_display);
         batteryLevelDisplay = root.findViewById(R.id.battery_level_display);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -90,6 +93,8 @@ public class HomeFragment extends Fragment {
             else if(action.equals(BATTERY_INTENT)){
                 String batteryLevel = intent.getStringExtra("batteryLevel");
                 batteryLevelDisplay.setText(batteryLevel+"%");
+                ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
+                actionBar.setTitle("Pulsera conectada " + batteryLevel + "%");
                 Log.d("Battery level",batteryLevel + "%");
             }
         }

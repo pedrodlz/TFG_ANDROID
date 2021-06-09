@@ -4,6 +4,9 @@
     android:id="@+id/paired_devices"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:elevation="3dp"
+    android:background="@drawable/alert_item"
     android:orientation="vertical">
 
     <TextView
@@ -12,7 +15,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif"
         android:text="Name"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="@color/custom_dark_grey"
         android:textSize="14sp"/>
 
     <TextView
@@ -21,7 +24,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif"
         android:text="Address"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="@color/custom_dark_grey"
         android:textSize="14sp"/>
 
 </LinearLayout>

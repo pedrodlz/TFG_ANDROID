@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -74,8 +75,8 @@ public class DashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
-        /*mMicButton = findViewById(R.id.mic_button);
-        mResultText = findViewById(R.id.result_text);*/
+        setBarColor();
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
@@ -86,95 +87,16 @@ public class DashboardActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(navView, navController);
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
-            //checkPermission();
 
-        /*speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-
-        final Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-
-        Log.d(TAG,"LOCALE:"+ Locale.getDefault().getLanguage());
-
-        speechRecognizer.setRecognitionListener(new RecognitionListener() {
-
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {
-                mResultText.setText("");
-                mResultText.setHint("Escuchando...");
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-
-            }
-
-            @Override
-            public void onError(int error) {
-                mMicButton.setImageResource(R.drawable.ic_baseline_mic_off_24);
-                Log.e(TAG, String.valueOf(error));
-            }
-
-            @Override
-            public void onResults(Bundle results) {
-                mMicButton.setImageResource(R.drawable.ic_baseline_mic_off_24);
-                ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-
-                String result = data.get(0);
-                mResultText.setText(result);
-
-                if(result.contains("perfil")){
-                    navController.navigate(R.id.navigation_profile);
-                }
-            }
-
-            @Override
-            public void onPartialResults(Bundle partialResults) {
-
-            }
-
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-
-            }
-        });
-
-        mMicButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP){
-                    speechRecognizer.stopListening();
-                }
-                if (event.getAction() == MotionEvent.ACTION_DOWN){
-                    mMicButton.setImageResource(R.drawable.ic_baseline_mic_24);
-                    speechRecognizer.startListening(speechRecognizerIntent);
-                }
-
-                return false;
-            }
-        });*/
     }
 
-    private void checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ActivityCompat.requestPermissions(this,new String[]{
-                    Manifest.permission.RECORD_AUDIO
-            },RecordAudioRequestCode);
+    private void setBarColor(){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.primary,this.getTheme())));
+            getWindow().setStatusBarColor(getResources().getColor(R.color.primary,this.getTheme()));
+        }
+        else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+            getWindow().setStatusBarColor(getResources().getColor(R.color.primary));
         }
     }
 

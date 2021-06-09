@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
@@ -13,72 +14,98 @@
         android:id="@+id/falls_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:text="@string/fall_alert"
+        android:layout_marginTop="16dp"
         android:button="@null"
-        android:drawableRight="?android:attr/listChoiceIndicatorMultiple"/>
+        android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+        android:fontFamily="@font/hind"
+        android:text="@string/fall_alert"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/weight_alert"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_alignParentEnd="true"
-        android:gravity="center_vertical"
+        android:layout_marginTop="24dp"
         android:background="@drawable/alert_item"
-        android:orientation="horizontal">
+        android:elevation="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/falls_checkbox">
+
 
         <TextView
-            android:layout_width="147dp"
+            android:id="@+id/textView15"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/hind"
             android:paddingStart="20dp"
             android:text="@string/weight_alert"
             android:textColor="@color/black"
             android:textSize="20sp"
-            android:textStyle="bold" />
-
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/weight_edit_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/weight_edit_text"
             android:layout_width="168dp"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:background="@color/white"
             android:hint="Introduce el peso"
             android:padding="5dp"
-            android:textColor="@color/black" />
-
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/weight_check_box"
+            app:layout_constraintStart_toEndOf="@+id/textView15"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <CheckBox
             android:id="@+id/weight_check_box"
-            android:layout_width="37dp"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_width="34dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.428" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/heart_rate_alert"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_below="@+id/weight_alert"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:gravity="center_vertical"
+        android:layout_marginTop="20dp"
         android:background="@drawable/alert_item"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="35dp"
-        android:layout_marginEnd="-2dp"
-        android:layout_marginRight="-2dp"
-        android:orientation="horizontal">
+        android:elevation="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/weight_alert">
+
 
         <TextView
-            android:layout_width="147dp"
+            android:id="@+id/textView16"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/hind"
             android:paddingStart="20dp"
             android:text="@string/heart_rate_alert"
             android:textColor="@color/black"
             android:textSize="20sp"
-            android:textStyle="bold" />
-
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/heart_rate_edit_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/heart_rate_edit_text"
@@ -87,40 +114,52 @@
             android:background="@color/white"
             android:hint="Introduce pulsacio"
             android:padding="5dp"
-            android:textColor="@color/black" />
-
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/heart_rate_checkbox"
+            app:layout_constraintStart_toEndOf="@+id/textView16"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <CheckBox
             android:id="@+id/heart_rate_checkbox"
-            android:layout_width="32dp"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_width="34dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.428" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/battery_alert"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_below="@+id/heart_rate_alert"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:gravity="center_vertical"
+        android:layout_marginTop="20dp"
         android:background="@drawable/alert_item"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="35dp"
-        android:layout_marginEnd="-2dp"
-        android:layout_marginRight="-2dp"
-        android:orientation="horizontal">
+        android:elevation="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/heart_rate_alert">
+
 
         <TextView
-            android:layout_width="147dp"
+            android:id="@+id/textView9"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/hind"
             android:paddingStart="20dp"
             android:text="@string/battery_alert"
             android:textColor="@color/black"
             android:textSize="20sp"
-            android:textStyle="bold" />
-
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/battery_edit_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/battery_edit_text"
@@ -129,40 +168,52 @@
             android:background="@color/white"
             android:hint="Introduce el nivel"
             android:padding="5dp"
-            android:textColor="@color/black" />
-
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/battery_checkbox"
+            app:layout_constraintStart_toEndOf="@+id/textView9"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.52" />
 
         <CheckBox
             android:id="@+id/battery_checkbox"
             android:layout_width="34dp"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/phone_alert"
         android:layout_width="match_parent"
         android:layout_height="68dp"
         android:layout_below="@+id/battery_alert"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="35dp"
-        android:layout_marginEnd="-2dp"
-        android:layout_marginRight="-2dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/alert_item"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:elevation="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/battery_alert">
+
 
         <TextView
-            android:layout_width="147dp"
+            android:id="@+id/textView5"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/hind"
             android:paddingStart="20dp"
             android:text="@string/phone_alert"
             android:textColor="@color/black"
             android:textSize="20sp"
-            android:textStyle="bold" />
-
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/phone_edit_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/phone_edit_text"
@@ -171,47 +222,62 @@
             android:background="@color/white"
             android:hint="Introduce numero"
             android:padding="5dp"
-            android:textColor="@color/black" />
-
+            android:textColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/phone_checkbox"
+            app:layout_constraintStart_toEndOf="@+id/textView5"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <CheckBox
             android:id="@+id/phone_checkbox"
             android:layout_width="34dp"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
-
-
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/sos_layout"
         android:layout_width="194dp"
         android:layout_height="50dp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="35dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/sos_layout"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="35dp">
+        android:elevation="3dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/phone_alert"
+        app:layout_constraintVertical_bias="1.0">
 
         <ImageView
+            android:id="@+id/imageView5"
             android:layout_width="37dp"
             android:layout_height="37dp"
+            android:layout_marginStart="28dp"
             android:background="@drawable/ic_phone_svgrepo_com"
-            android:backgroundTint="@color/forth" />
+            android:backgroundTint="@color/forth"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.538" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="30dp"
+            android:layout_marginStart="17dp"
+            android:layout_marginEnd="40dp"
             android:fontFamily="@font/hind_bold"
             android:paddingStart="15dp"
             android:text="S.O.S"
             android:textColor="@color/forth"
-            android:textSize="25sp" />
-    </LinearLayout>
+            android:textSize="25sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/imageView5"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 

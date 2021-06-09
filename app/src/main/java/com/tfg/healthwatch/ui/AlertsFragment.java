@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -43,7 +44,7 @@ public class AlertsFragment extends Fragment {
     private String TAG = "AlertsFragment";
     private FirebaseUser currentUser;
     private DatabaseReference userAlerts;
-    private LinearLayout mSOSButton;
+    private ConstraintLayout mSOSButton;
     private CheckBox mFallCheckbox,weightCheckbox,heartRateCheckbox,batteryCheckbox, phoneCheckbox;
     private EditText weightEdit,heartRateEdit,batteryEdit, phoneEdit;
     private String phoneNumber = null;
