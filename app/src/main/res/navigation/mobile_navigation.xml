@@ -38,17 +38,23 @@
                 app:argType="string"
                 android:defaultValue="error" />
         </action>
+        <action
+            android:id="@+id/action_navigation_diagnose_to_navigation_meaning_cloud"
+            app:destination="@id/navigation_meaning_cloud" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_tests"
         android:name="com.tfg.healthwatch.ui.TestsFragment"
         android:label="Tests"
-        tools:layout="@layout/fragment_tests" >
-        <action
-            android:id="@+id/action_navigation_tests_to_navigation_diagnose"
-            app:popUpTo="@id/navigation_tests"
-            app:destination="@id/navigation_diagnose" />
+        tools:layout="@layout/fragment_tests" />
+
+    <fragment
+        android:id="@+id/navigation_meaning_cloud"
+        android:name="com.tfg.healthwatch.ui.MeaningCloud"
+        android:label="Results"
+        tools:layout="@layout/fragment_meaning_cloud_result">
+
     </fragment>
 
     <fragment

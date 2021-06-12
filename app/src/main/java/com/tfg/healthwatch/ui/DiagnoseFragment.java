@@ -67,9 +67,7 @@ public class DiagnoseFragment extends Fragment {
         meaningButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bundle bundle = new Bundle();
-                bundle.putString("type", "meaning");
-                navc.navigate(R.id.action_navigation_diagnose_to_navigation_tests,bundle);
+                navc.navigate(R.id.action_navigation_diagnose_to_navigation_meaning_cloud);
             }
         });
 

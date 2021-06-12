@@ -39,4 +39,16 @@
     <string name="spanish">Español</string>
     <string name="english">Inglés</string>
     <string name="log_out">Cerrar sesión</string>
+    <string name="name">Nombre</string>
+    <string name="surname">Apellidos</string>
+    <string name="date_birth">Fecha de nacimiento</string>
+    <string name="gender">Género</string>
+    <string name="height">Altura</string>
+    <string name="weight">Peso</string>
+    <string name="save">Guardar</string>
+    <string name="general_feeling">Sentimiento general</string>
+    <string name="energy_test">Test de energía</string>
+    <string name="habit_test">Test de hábitos</string>
+    <string name="goal_test">Test de objetivos</string>
+    <string name="free_test">Test libre</string>
 </resources>

@@ -9,6 +9,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -18,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -45,6 +50,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.R;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -75,11 +81,12 @@ public class TestsFragment extends Fragment {
     private DatabaseReference responseData;
     private String language;
     private ArrayList questions = new ArrayList();
-    private TextView questionText, microphoneStatus;
+    private TextView questionText;
     private EditText responseText;
-    private ImageView cancelButton, microphoneButton, saveButton;
+    private Button saveButton;
     private Integer currentQuestion = 0;
     private SpeechRecognizer speechRecognizer;
+    private RecyclerView questionsList;
 
     public TestsFragment() {
         // Required empty public constructor
@@ -99,6 +106,20 @@ public class TestsFragment extends Fragment {
         args.putString(ARG_PARAM1, type);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public static class Question {
+
+        public String text;
+        public int selectedPuntuation;
+        public String id;
+
+        public Question(String text, int selectedPuntuation, String id) {
+            this.text = text;
+            this.selectedPuntuation = selectedPuntuation;
+            this.id = id;
+        }
+
     }
 
     @Override
@@ -133,12 +154,6 @@ public class TestsFragment extends Fragment {
                                     Log.e("Value " ,post);
                                     questions.add(post);
                                 }
-
-                                try {
-                                    nextQuestion();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
                             }
 
                             @Override
@@ -149,8 +164,6 @@ public class TestsFragment extends Fragment {
 
                         break;
                     case "goal":
-                        break;
-                    case "meaning":
                         break;
                     default:
                         Log.e(TAG,"Error getting test type");
@@ -166,12 +179,26 @@ public class TestsFragment extends Fragment {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_tests, container, false);
 
-        questionText = root.findViewById(R.id.test_text);
-        microphoneStatus = root.findViewById(R.id.microphone_status);
-        responseText = root.findViewById(R.id.response_text);
-        cancelButton = root.findViewById(R.id.cancel_test_button);
-        microphoneButton = root.findViewById(R.id.microphone_response_button);
-        saveButton = root.findViewById(R.id.save_response_button);
+        // Set the adapter
+        questionsList = root.findViewById(R.id.goals_list);
+        //goalTable.child(currentUser.getUid()).push().setValue(new Goal("Test goal","custom"));
+
+        ArrayList<TestsFragment.Question> questionArrayList = new ArrayList<TestsFragment.Question>();
+
+        for (String child: questions) {
+            
+            Boolean status = (Boolean) child.child("status").getValue();
+
+            goalArrayList.add(new GoalsFragment.Goal(text,type,status,child.getKey()));
+        }
+        GoalListAdapater adapter = new GoalListAdapater(getContext(), goalArrayList);
+        goalList.setAdapter(adapter);
+        goalList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+
+
+
+        saveButton = root.findViewById(R.id.save_test_button);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,182 +211,16 @@ public class TestsFragment extends Fragment {
             }
         });
 
-        checkPermission();
-
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(getActivity());
-
-        final Intent speechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-
-        speechRecognizer.setRecognitionListener(new RecognitionListener() {
-
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {
-                microphoneStatus.setText("Escuchando...");
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-
-            }
-
-            @Override
-            public void onError(int error) {
-                //microphoneButton.setImageResource(R.drawable.ic_baseline_mic_off_24);
-                Log.e(TAG, String.valueOf(error));
-            }
-
-            @Override
-            public void onResults(Bundle results) {
-                //microphoneButton.setImageResource(R.drawable.ic_baseline_mic_off_24);
-                ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-
-                String result = data.get(0);
-                responseText.setText(result);
-                microphoneStatus.setText("");
-            }
-
-            @Override
-            public void onPartialResults(Bundle partialResults) {
-
-            }
-
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-
-            }
-        });
-
-        microphoneButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP){
-                    speechRecognizer.stopListening();
-                }
-                if (event.getAction() == MotionEvent.ACTION_DOWN){
-                    //microphoneButton.setImageResource(R.drawable.ic_baseline_mic_24);
-                    speechRecognizer.startListening(speechRecognizerIntent);
-                }
-
-                return false;
-            }
-        });
-
-        if (mType == "meaning") {
-            try {
-                nextQuestion();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
 
         return root;
     }
 
-    private void checkPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ActivityCompat.requestPermissions(getActivity(),new String[]{
-                    Manifest.permission.RECORD_AUDIO
-            },1);
-        }
-    }
-
-    private void nextQuestion() throws Exception {
-        if(mType != "error"){
-            // Show next
-            if(currentQuestion < questions.size()){
-                questionText.setText(questions.get(currentQuestion).toString());
-            }
-            else if(mType == "meaning"){
-                questionText.setText("Cuentame como te sientes");
-            }
-            else{
-                //Exit test
-                Toast.makeText(getContext(),"Test finished!",Toast.LENGTH_SHORT).show();
-            }
-        }
-        else{
-            throw new Exception("Type not selected");
-        }
-    }
-
     private void saveResponse() throws Exception {
         if(mType != "error"){
-            if(currentQuestion < questions.size()){
-                String questionIndex = currentQuestion+"";
-                String response = responseText.getText().toString();
-                responseData.child(mType)
-                        .child(questionIndex)
-                        .setValue(response)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                responseText.setText("");
-                                currentQuestion++;
-                                try {
-                                    nextQuestion();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-            }
-            else if(mType == "meaning"){
-                sendDataToApiMeaning();
-            }
+
         }
         else{
             throw new Exception("Type not selected");
         }
-    }
-
-    private void sendDataToApiMeaning(){
-        // Instantiate the RequestQueue.
-        try{
-            RequestQueue queue = Volley.newRequestQueue(getContext());
-            String url ="https://api.meaningcloud.com/sentiment-2.1?key=74833d8cd376c37a060366a8c88b529c&lang="+language;
-            String textToAnalyze = responseText.getText().toString();
-            url += "&txt="+textToAnalyze;
-
-            // Request a string response from the provided URL.
-            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                    new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String  response) {
-                            // Display the first 500 characters of the response string.
-                            Log.i("VOLLEY", response);
-
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            microphoneStatus.setText("That didn't work!");
-                            Log.e("VOLLEY", error.toString());
-
-                        }
-            });
-
-            // Add the request to the RequestQueue.
-            queue.add(stringRequest);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-
     }
 }

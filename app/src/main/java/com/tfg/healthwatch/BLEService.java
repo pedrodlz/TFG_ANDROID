@@ -69,7 +69,7 @@ public class BLEService extends Service {
     private boolean batteryNotificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
     private DatabaseReference activityTable;
-    private Double currentTotalHeartRate = 0.00;
+    private Integer currentTotalHeartRate = 0;
     private int totalHeartRates = 0;
     private String TAG = "BLEService";
     private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
@@ -406,16 +406,16 @@ public class BLEService extends Service {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.child("Total Heart Rate").exists() && snapshot.child("Heart Rates").exists()){
-                    currentTotalHeartRate = snapshot.child("Total Heart Rate").getValue(Double.class);
+                    currentTotalHeartRate = snapshot.child("Total Heart Rate").getValue(Integer.class);
                     totalHeartRates = (int) snapshot.child("Heart Rates").getChildrenCount();
                 }
                 else if(!snapshot.child("Total Heart Rate").exists() && snapshot.child("Heart Rates").exists()){
                     totalHeartRates = (int) snapshot.child("Heart Rates").getChildrenCount();
-                    currentTotalHeartRate = 0.00;
-                    Double avgHeartRate = 0.00;
+                    currentTotalHeartRate = 0;
+                    Integer avgHeartRate = 0;
 
                     for (DataSnapshot child: snapshot.child("Heart Rates").getChildren()) {
-                        Double rate = child.getValue(Double.class);
+                        Integer rate = child.getValue(Integer.class);
                         currentTotalHeartRate += rate;
                     }
                     Log.d(TAG,"Total heart Rates: " + totalHeartRates+"");
@@ -423,9 +423,8 @@ public class BLEService extends Service {
                     Log.d(TAG,"Average heart rate today: "+ currentTotalHeartRate);
 
                     activityTable.child("Total Heart Rate").setValue(currentTotalHeartRate);
-                    if(!avgHeartRate.isNaN()){
-                        DecimalFormat df2 = new DecimalFormat("#.##");
-                        activityTable.child("Average Heart Rate").setValue(df2.format(avgHeartRate));
+                    if(avgHeartRate != null){
+                        activityTable.child("Average Heart Rate").setValue(avgHeartRate);
                     }
                 }
             }
@@ -543,14 +542,14 @@ public class BLEService extends Service {
 
             Integer heartRate = characteristic.getIntValue(format,1);
 
-            if(!currentTotalHeartRate.isNaN()){
+            if(currentTotalHeartRate != null){
                 currentTotalHeartRate += heartRate;
             }
-            else currentTotalHeartRate = heartRate + 0.00;
+            else currentTotalHeartRate = heartRate;
 
             totalHeartRates++;
 
-            Double avgHeartRates = currentTotalHeartRate / totalHeartRates;
+            int avgHeartRates = currentTotalHeartRate / totalHeartRates;
 
             activityTable.child("Heart Rates").push().setValue(heartRate);
             activityTable.child("Total Heart Rate").setValue(currentTotalHeartRate);

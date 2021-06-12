@@ -57,4 +57,16 @@
     <string name="language_string">Language</string>
     <string name="about_string">About</string>
     <string name="about_information_text">This app has been developed by Pedro Domínguez López, as part of the bachelor thesis in computer engineering at Universidad de Granada. 2021</string>
+    <string name="name">Name</string>
+    <string name="surname">Surname</string>
+    <string name="date_birth">Date of birth</string>
+    <string name="gender">Gender</string>
+    <string name="height">Height</string>
+    <string name="weight">Weight</string>
+    <string name="save">Save</string>
+    <string name="general_feeling">General feeling</string>
+    <string name="energy_test">Energy Test</string>
+    <string name="habit_test">Habit Test</string>
+    <string name="goal_test">Goals Test</string>
+    <string name="free_test">Free Test</string>
 </resources>

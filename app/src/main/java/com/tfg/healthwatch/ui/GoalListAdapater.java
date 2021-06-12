@@ -51,7 +51,7 @@ public class GoalListAdapater extends RecyclerView.Adapter<GoalListAdapater.Goal
         Log.d("Tipo ",goalsList.get(position).type);
         Log.d("String ",context.getString(R.string.custom));
 
-        if(!goalsList.get(position).type.equals("Custom") && !goalsList.get(position).type.equals("Personalizado")){
+        if(!goalsList.get(position).type.equals("custom")){
             String[] text = goalsList.get(position).type.split(" ");
             if(text.length > 1){
                 showText = text[0] + " " + goalsList.get(position).text + " " + text[1];
