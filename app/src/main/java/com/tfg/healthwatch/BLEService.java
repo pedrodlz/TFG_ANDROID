@@ -405,11 +405,7 @@ public class BLEService extends Service {
         activityTable.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.child("Total Heart Rate").exists() && snapshot.child("Heart Rates").exists()){
-                    currentTotalHeartRate = snapshot.child("Total Heart Rate").getValue(Integer.class);
-                    totalHeartRates = (int) snapshot.child("Heart Rates").getChildrenCount();
-                }
-                else if(!snapshot.child("Total Heart Rate").exists() && snapshot.child("Heart Rates").exists()){
+                if(snapshot.child("Heart Rates").exists()){
                     totalHeartRates = (int) snapshot.child("Heart Rates").getChildrenCount();
                     currentTotalHeartRate = 0;
                     Integer avgHeartRate = 0;
@@ -422,9 +418,15 @@ public class BLEService extends Service {
                     avgHeartRate = currentTotalHeartRate / totalHeartRates;
                     Log.d(TAG,"Average heart rate today: "+ currentTotalHeartRate);
 
-                    activityTable.child("Total Heart Rate").setValue(currentTotalHeartRate);
                     if(avgHeartRate != null){
                         activityTable.child("Average Heart Rate").setValue(avgHeartRate);
+                    }
+
+                    if(!snapshot.child("date").exists()){
+                        SimpleDateFormat ISO_8601_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss'Z'");
+
+                        String now = ISO_8601_FORMAT.format(new Date());
+                        activityTable.child("date").setValue(now);
                     }
                 }
             }
@@ -542,22 +544,12 @@ public class BLEService extends Service {
 
             Integer heartRate = characteristic.getIntValue(format,1);
 
-            if(currentTotalHeartRate != null){
-                currentTotalHeartRate += heartRate;
-            }
-            else currentTotalHeartRate = heartRate;
-
-            totalHeartRates++;
-
-            int avgHeartRates = currentTotalHeartRate / totalHeartRates;
-
             activityTable.child("Heart Rates").push().setValue(heartRate);
-            activityTable.child("Total Heart Rate").setValue(currentTotalHeartRate);
-            activityTable.child("Average Heart Rate").setValue(avgHeartRates);
 
             sendBroadcast(new Intent("com.tfg.healthwatch.HEART_RATE").putExtra("heartRate",heartRate.toString()));
 
             Log.d(TAG,"HEART RATE: "+heartRate);
+            getAvgHeartRate();
         }
     }
 

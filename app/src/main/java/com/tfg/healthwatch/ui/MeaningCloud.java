@@ -83,7 +83,7 @@ public class MeaningCloud extends Fragment {
 
         LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
         String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
-        responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid()).child(stringDate);
+        responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid()).child(stringDate).child("meaningCloud");
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -200,7 +200,7 @@ public class MeaningCloud extends Fragment {
 
     private void saveResponse() throws Exception {
         String response = responseText.getText().toString();
-        responseData.child("meaningCloud")
+        responseData.child("responseText")
             .setValue(response)
             .addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
@@ -258,6 +258,7 @@ public class MeaningCloud extends Fragment {
     private void treatResponse() throws JSONException {
         Log.d(TAG,"API results: "+ resultsObject);
         feeling = resultsObject.getString("score_tag");
+        responseData.child("textFeeling").setValue(feeling);
 
         JSONArray entityList = new JSONArray(resultsObject.getString("sentimented_entity_list"));
         JSONArray conceptList = new JSONArray(resultsObject.getString("sentimented_concept_list"));

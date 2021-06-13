@@ -1,46 +1,23 @@
 package com.tfg.healthwatch.ui;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.os.Build;
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.speech.RecognitionListener;
-import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -51,16 +28,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.R;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -79,14 +51,15 @@ public class TestsFragment extends Fragment {
     private FirebaseUser currentUser;
     private DatabaseReference testData;
     private DatabaseReference responseData;
-    private String language;
-    private ArrayList questions = new ArrayList();
+    private String language, high, medium, low;
+    private ArrayList<TestsFragment.Question> questions = new ArrayList<TestsFragment.Question>();;
     private TextView questionText;
     private EditText responseText;
     private Button saveButton;
     private Integer currentQuestion = 0;
     private SpeechRecognizer speechRecognizer;
     private RecyclerView questionsList;
+    private TestListAdapter adapter;
 
     public TestsFragment() {
         // Required empty public constructor
@@ -111,12 +84,12 @@ public class TestsFragment extends Fragment {
     public static class Question {
 
         public String text;
-        public int selectedPuntuation;
+        public int selectedPunctuation;
         public String id;
 
-        public Question(String text, int selectedPuntuation, String id) {
+        public Question(String text, int selectedPunctuation, String id) {
             this.text = text;
-            this.selectedPuntuation = selectedPuntuation;
+            this.selectedPunctuation = selectedPunctuation;
             this.id = id;
         }
 
@@ -127,48 +100,17 @@ public class TestsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mType = getArguments().getString(ARG_PARAM1);
+            Log.d(TAG,"Selected type: "+ mType);
 
-            if(mType != null){
-                currentUser = FirebaseAuth.getInstance().getCurrentUser();
-                language = Locale.getDefault().getLanguage();
-                testData = FirebaseDatabase.getInstance().getReference().child("Tests");
+            currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            language = Locale.getDefault().getLanguage();
+            testData = FirebaseDatabase.getInstance().getReference().child("Tests").child(mType).child(language);
 
-                LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
-                String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
+            LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
+            String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
 
-                responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid()).child(stringDate);
-                DatabaseReference table = testData.child("error").child(language);;
-                switch(mType){
-                    case "energy":
-                    case "habit":
-                        if(mType == "energy") table = testData.child("energy").child(language);
-                        else if(mType == "habit") table = testData.child("habit").child(language);
+            responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid()).child(stringDate).child(mType);
 
-                        table.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                questions = new ArrayList<String>();
-
-                                for (DataSnapshot child: snapshot.getChildren()) {
-                                    String post = child.getValue().toString();
-                                    Log.e("Value " ,post);
-                                    questions.add(post);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
-
-                        break;
-                    case "goal":
-                        break;
-                    default:
-                        Log.e(TAG,"Error getting test type");
-                }
-            }
         }
     }
 
@@ -180,23 +122,43 @@ public class TestsFragment extends Fragment {
         View root = inflater.inflate(R.layout.fragment_tests, container, false);
 
         // Set the adapter
-        questionsList = root.findViewById(R.id.goals_list);
-        //goalTable.child(currentUser.getUid()).push().setValue(new Goal("Test goal","custom"));
+        questionsList = root.findViewById(R.id.test_question_list);
 
-        ArrayList<TestsFragment.Question> questionArrayList = new ArrayList<TestsFragment.Question>();
+        if(mType != null){
+            switch(mType){
+                case "energy":
+                case "habit":
 
-        for (String child: questions) {
-            
-            Boolean status = (Boolean) child.child("status").getValue();
+                    testData.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                            high = snapshot.child("verdict").child("high").getValue().toString();
+                            medium = snapshot.child("verdict").child("medium").getValue().toString();
+                            low = snapshot.child("verdict").child("low").getValue().toString();
 
-            goalArrayList.add(new GoalsFragment.Goal(text,type,status,child.getKey()));
+                            for (DataSnapshot child: snapshot.child("questions").getChildren()) {
+                                String post = child.getValue().toString();
+                                Log.d(TAG,post);
+                                questions.add(new Question(post,0,child.getKey()));
+                            }
+                            adapter = new TestListAdapter(getContext(), questions,mType);
+                            questionsList.setAdapter(adapter);
+                            questionsList.setLayoutManager(new LinearLayoutManager(getContext()));
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+                        }
+                    });
+
+                    break;
+                case "goal":
+                    break;
+                default:
+                    Log.e(TAG,"Error getting test type");
+            }
         }
-        GoalListAdapater adapter = new GoalListAdapater(getContext(), goalArrayList);
-        goalList.setAdapter(adapter);
-        goalList.setLayoutManager(new LinearLayoutManager(getContext()));
-
-
-
 
         saveButton = root.findViewById(R.id.save_test_button);
 
@@ -204,7 +166,7 @@ public class TestsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
-                    saveResponse();
+                    buildResponse();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -215,9 +177,41 @@ public class TestsFragment extends Fragment {
         return root;
     }
 
-    private void saveResponse() throws Exception {
+    private void buildResponse() throws Exception {
         if(mType != "error"){
 
+            ValueEventListener responseValues = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                    int punctuation = 0;
+                    String finalResponse = null;
+                    for(DataSnapshot response: snapshot.getChildren()){
+                        punctuation += response.getValue(int.class);
+                    }
+
+                    if(punctuation >= 34 && punctuation <= 50){
+                        finalResponse = high;
+                    }
+                    else if(punctuation >= 17 && punctuation <= 33){
+                        finalResponse = medium;
+                    }
+                    else if(punctuation >= 0 && punctuation <= 16){
+                        finalResponse = low;
+                    }
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setTitle("Resultados");
+                    builder.setMessage(finalResponse);
+                    builder.show();
+                }
+
+                @Override
+                public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+                }
+            };
+
+            responseData.addValueEventListener(responseValues);
         }
         else{
             throw new Exception("Type not selected");

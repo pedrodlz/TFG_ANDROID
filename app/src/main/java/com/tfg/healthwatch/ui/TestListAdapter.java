@@ -1,14 +1,10 @@
 package com.tfg.healthwatch.ui;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -57,15 +53,66 @@ public class TestListAdapter extends RecyclerView.Adapter<TestListAdapter.Questi
     @Override
     public void onBindViewHolder(@NonNull @NotNull Question holder, int position) {
         String showText = questionsList.get(position).text;
-        int selected = questionsList.get(position).selectedPuntuation;
-
         holder.questionText.setText(showText);
 
         holder.star1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String positionS = position +"";
-                responsesTable.child(positionS).child("selectedPuntuation").setValue(selected);
+                holder.star1.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star2.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                holder.star3.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                holder.star4.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                holder.star5.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                responsesTable.child(questionsList.get(position).id).setValue(1);
+            }
+        });
+
+        holder.star2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.star1.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star2.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star3.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                holder.star4.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                holder.star5.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+
+                responsesTable.child(questionsList.get(position).id).setValue(2);
+            }
+        });
+
+        holder.star3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.star1.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star2.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star3.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star4.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                holder.star5.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                responsesTable.child(questionsList.get(position).id).setValue(3);
+            }
+        });
+
+        holder.star4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.star1.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star2.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star3.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star4.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star5.setImageResource(R.drawable.ic_star_empty_svgrepo_com);
+                responsesTable.child(questionsList.get(position).id).setValue(4);
+            }
+        });
+
+        holder.star5.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.star1.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star2.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star3.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star4.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                holder.star5.setImageResource(R.drawable.ic_star_filled_svgrepo_com);
+                responsesTable.child(questionsList.get(position).id).setValue(5);
             }
         });
 
@@ -86,6 +133,10 @@ public class TestListAdapter extends RecyclerView.Adapter<TestListAdapter.Questi
 
             questionText = itemView.findViewById(R.id.question_text);
             star1 = itemView.findViewById(R.id.starButton1);
+            star2 = itemView.findViewById(R.id.starButton2);
+            star3 = itemView.findViewById(R.id.starButton3);
+            star4 = itemView.findViewById(R.id.starButton4);
+            star5 = itemView.findViewById(R.id.starButton5);
         }
     }
 }

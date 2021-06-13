@@ -45,7 +45,7 @@
                 android:layout_weight="1"></Space>
 
             <ImageButton
-                android:id="@+id/imageButton7"
+                android:id="@+id/verySadFace"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@color/white"
@@ -59,7 +59,7 @@
                 android:layout_weight="1"></Space>
 
             <ImageButton
-                android:id="@+id/imageButton8"
+                android:id="@+id/sadFace"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@color/white"
@@ -73,7 +73,7 @@
                 android:layout_weight="1"></Space>
 
             <ImageButton
-                android:id="@+id/imageButton9"
+                android:id="@+id/normalFace"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@color/white"
@@ -87,7 +87,7 @@
                 android:layout_weight="1"></Space>
 
             <ImageButton
-                android:id="@+id/imageButton10"
+                android:id="@+id/smileFace"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@color/white"
@@ -101,7 +101,7 @@
                 android:layout_weight="1"></Space>
 
             <ImageButton
-                android:id="@+id/imageButton11"
+                android:id="@+id/veryHappyFace"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@color/white"
