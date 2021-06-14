@@ -27,7 +27,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/weight_alert"
+        android:id="@+id/steps_alert"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_alignParentEnd="true"
@@ -45,17 +45,17 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/hind"
             android:paddingStart="20dp"
-            android:text="@string/weight_alert"
+            android:text="@string/steps_alert"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/weight_edit_text"
+            app:layout_constraintEnd_toStartOf="@+id/steps_edit_text"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-            android:id="@+id/weight_edit_text"
+            android:id="@+id/steps_edit_text"
             android:layout_width="168dp"
             android:layout_height="30dp"
             android:background="@color/white"
@@ -63,12 +63,12 @@
             android:padding="5dp"
             android:textColor="@color/black"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/weight_check_box"
+            app:layout_constraintEnd_toStartOf="@+id/steps_check_box"
             app:layout_constraintStart_toEndOf="@+id/textView15"
             app:layout_constraintTop_toTopOf="parent" />
 
         <CheckBox
-            android:id="@+id/weight_check_box"
+            android:id="@+id/steps_check_box"
             android:layout_width="34dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -81,7 +81,7 @@
         android:id="@+id/heart_rate_alert"
         android:layout_width="match_parent"
         android:layout_height="55dp"
-        android:layout_below="@+id/weight_alert"
+        android:layout_below="@+id/steps_alert"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_marginTop="20dp"
@@ -89,7 +89,7 @@
         android:elevation="3dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/weight_alert">
+        app:layout_constraintTop_toBottomOf="@+id/steps_alert">
 
 
         <TextView

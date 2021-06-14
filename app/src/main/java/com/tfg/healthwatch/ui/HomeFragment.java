@@ -55,7 +55,6 @@ public class HomeFragment extends Fragment {
     private FirebaseUser currentUser;
     private DatabaseReference heartRateTable;
     private TextView heartDisplay;
-    private TextView batteryLevelDisplay;
     private Button mAddButton;
     static final String HEART_RATE_INTENT = "com.tfg.healthwatch.HEART_RATE";
     private static final String BATTERY_INTENT = "com.tfg.healthwatch.BATTERY_LEVEL";

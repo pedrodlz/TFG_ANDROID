@@ -96,6 +96,43 @@ public class TestsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy () {
+        super.onDestroy();
+        responseData.removeEventListener(responseValues);
+    }
+
+    ValueEventListener responseValues = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+            int punctuation = 0;
+            String finalResponse = null;
+            for(DataSnapshot response: snapshot.getChildren()){
+                punctuation += response.getValue(int.class);
+            }
+
+            if(punctuation >= 34 && punctuation <= 50){
+                finalResponse = high;
+            }
+            else if(punctuation >= 17 && punctuation <= 33){
+                finalResponse = medium;
+            }
+            else if(punctuation >= 0 && punctuation <= 16){
+                finalResponse = low;
+            }
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("Resultados");
+            builder.setMessage(finalResponse);
+            builder.show();
+        }
+
+        @Override
+        public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+        }
+    };
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -179,38 +216,6 @@ public class TestsFragment extends Fragment {
 
     private void buildResponse() throws Exception {
         if(mType != "error"){
-
-            ValueEventListener responseValues = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                    int punctuation = 0;
-                    String finalResponse = null;
-                    for(DataSnapshot response: snapshot.getChildren()){
-                        punctuation += response.getValue(int.class);
-                    }
-
-                    if(punctuation >= 34 && punctuation <= 50){
-                        finalResponse = high;
-                    }
-                    else if(punctuation >= 17 && punctuation <= 33){
-                        finalResponse = medium;
-                    }
-                    else if(punctuation >= 0 && punctuation <= 16){
-                        finalResponse = low;
-                    }
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setTitle("Resultados");
-                    builder.setMessage(finalResponse);
-                    builder.show();
-                }
-
-                @Override
-                public void onCancelled(@NonNull @NotNull DatabaseError error) {
-
-                }
-            };
-
             responseData.addValueEventListener(responseValues);
         }
         else{

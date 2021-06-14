@@ -32,6 +32,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -41,6 +42,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.ui.bluetooth.BluetoothObject;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -60,6 +63,7 @@ public class BLEService extends Service {
 
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothManager mBluetoothManager;
+    private static final String CHANNEL_ID = "mainChannel";
     private String mBluetoothDeviceAddress;
     private ArrayList<String> scannedStringArray = new ArrayList<String>();
     private ArrayList<BluetoothObject> scannedDevices = new ArrayList<BluetoothObject>();
@@ -69,6 +73,9 @@ public class BLEService extends Service {
     private boolean batteryNotificationOn = false;
     private int mConnectionState = BluetoothProfile.STATE_DISCONNECTED;
     private DatabaseReference activityTable;
+    private DatabaseReference alertsTable;
+    private String stepsLimit, heartRateLimit,batteryLimit,emergencyNumber;
+    private Boolean fallingChecked, stepsChecked, heartRatesChecked, batteryChecked, emergencyChecked;
     private Integer currentTotalHeartRate = 0;
     private int totalHeartRates = 0;
     private String TAG = "BLEService";
@@ -167,6 +174,76 @@ public class BLEService extends Service {
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         activityTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid()).child(stringDate);
+        alertsTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid());
+
+        alertsTable.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                if(snapshot.child("fallSensor").exists()){
+                    String checked = snapshot.child("fallSensor").child("checked").toString();
+                    if(!checked.isEmpty()) fallingChecked = (Boolean) snapshot.child("fallSensor").child("checked").getValue();
+                }
+                else fallingChecked = false;
+
+                if(snapshot.child("steps").exists()){
+                    String limit = snapshot.child("steps").child("limit").getValue().toString();
+                    String checked = snapshot.child("steps").child("checked").getValue().toString();
+
+                    if(!limit.isEmpty()){
+                        stepsLimit = limit;
+                        if(!checked.isEmpty()) stepsChecked = (Boolean) snapshot.child("steps").child("checked").getValue();
+                    }
+                    else{
+                        stepsChecked =false;
+                    }
+                }
+
+                if(snapshot.child("heartRate").exists()){
+                    String limit = snapshot.child("heartRate").child("limit").getValue().toString();
+                    String checked = snapshot.child("heartRate").child("checked").getValue().toString();
+
+                    if(!limit.isEmpty()){
+                        heartRateLimit = limit;
+                        if(!checked.isEmpty()) heartRatesChecked = (Boolean) snapshot.child("heartRate").child("checked").getValue();
+                    }
+                    else{
+                        heartRatesChecked = false;
+                    }
+                }
+
+                if(snapshot.child("battery").exists()){
+                    String limit = snapshot.child("battery").child("limit").getValue().toString();
+                    String checked = snapshot.child("battery").child("checked").getValue().toString();
+
+                    if(!limit.isEmpty()){
+                        batteryLimit = limit;
+                        if(!checked.isEmpty()) batteryChecked=(Boolean) snapshot.child("battery").child("checked").getValue();
+                    }
+                    else{
+                        batteryChecked = false;
+                    }
+                }
+
+                if(snapshot.child("emergencyNumber").exists()){
+                    String limit = snapshot.child("emergencyNumber").child("limit").getValue().toString();
+                    String checked = snapshot.child("emergencyNumber").child("checked").getValue().toString();
+
+                    if(!limit.isEmpty()){
+                        emergencyNumber = limit;
+                        if(!checked.isEmpty()) emergencyChecked = (Boolean) snapshot.child("emergencyNumber").child("checked").getValue();
+                    }
+                    else{
+                        emergencyChecked = false;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+            }
+        });
+
         getAvgHeartRate();
 
         return true;
@@ -414,9 +491,7 @@ public class BLEService extends Service {
                         Integer rate = child.getValue(Integer.class);
                         currentTotalHeartRate += rate;
                     }
-                    Log.d(TAG,"Total heart Rates: " + totalHeartRates+"");
                     avgHeartRate = currentTotalHeartRate / totalHeartRates;
-                    Log.d(TAG,"Average heart rate today: "+ currentTotalHeartRate);
 
                     if(avgHeartRate != null){
                         activityTable.child("Average Heart Rate").setValue(avgHeartRate);
@@ -555,6 +630,13 @@ public class BLEService extends Service {
 
     public void readBatteryLevel(BluetoothGattCharacteristic characteristic){
         String batteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0).toString();
+
+        if(batteryLimit != null){
+            if(batteryChecked && characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0) <= 15){
+
+            }
+        }
+
         sendBroadcast(new Intent(BATTERY_INTENT).putExtra("batteryLevel",batteryLevel));
     }
 }

@@ -56,6 +56,7 @@ public class DashboardActivity extends AppCompatActivity {
     boolean mBoundFalling = false;
     public static final int RecordAudioRequestCode = 1;
     private SpeechRecognizer speechRecognizer;
+    static final String HEART_RATE_INTENT = "com.tfg.healthwatch.HEART_RATE";
 
     @Override
     public void onStart() {

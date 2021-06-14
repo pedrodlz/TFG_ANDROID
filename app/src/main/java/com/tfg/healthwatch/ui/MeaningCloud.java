@@ -15,6 +15,7 @@ import androidx.navigation.Navigation;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -64,11 +65,11 @@ public class MeaningCloud extends Fragment {
     private EditText responseText;
     private SpeechRecognizer speechRecognizer;
     private ImageView cancelButton, microphoneButton, saveButton;
-    private ArrayList<String> veryPositive = new ArrayList<String>();
     private ArrayList<String> positive = new ArrayList<String>();
     private ArrayList<String> neutral = new ArrayList<String>();
     private ArrayList<String> negative = new ArrayList<String>();
-    private ArrayList<String> veryNegative = new ArrayList<String>();
+    private int maxRate=0, minRate=0;
+    private TextToSpeech ttobj;
 
     public MeaningCloud() {
         // Required empty public constructor
@@ -84,6 +85,15 @@ public class MeaningCloud extends Fragment {
         LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
         String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
         responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid()).child(stringDate).child("meaningCloud");
+
+        ttobj = new TextToSpeech(getContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if(status != TextToSpeech.ERROR){
+                    ttobj.setLanguage(Locale.getDefault());
+                }
+            }
+        });
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -107,6 +117,13 @@ public class MeaningCloud extends Fragment {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
             }
         });
 
@@ -259,6 +276,7 @@ public class MeaningCloud extends Fragment {
         Log.d(TAG,"API results: "+ resultsObject);
         feeling = resultsObject.getString("score_tag");
         responseData.child("textFeeling").setValue(feeling);
+        getMinMaxRates();
 
         JSONArray entityList = new JSONArray(resultsObject.getString("sentimented_entity_list"));
         JSONArray conceptList = new JSONArray(resultsObject.getString("sentimented_concept_list"));
@@ -279,57 +297,86 @@ public class MeaningCloud extends Fragment {
     private void classifyValue(String score, String value){
         switch(score){
             case "P+":
-                veryPositive.add(value);
-                break;
             case "P":
                 positive.add(value);
                 break;
             case "NEU":
+            case "NONE":
                 neutral.add(value);
                 break;
             case "N":
-                negative.add(value);
-                break;
             case "N+":
-                veryNegative.add(value);
+                negative.add(value);
                 break;
         }
     }
 
     private void buildResponseToUser(){
-        String response= "¡Hola! Según mi analisis veo que estás ";
 
+        String response= "¡Hola! Según mi análisis veo que estás ";
+        Log.d(TAG,"Max heart rate: "+maxRate);
+        Log.d(TAG,"Min heart rate: "+minRate);
+
+        switch (feeling){
+            case "P+":
+                response += "estupendamente!\n";
+
+                if(maxRate >= 90){
+                    response += "¡Y ya lo creo que si! " +
+                            "Has tenido un pico de pulsaciones de " +
+                            maxRate;
+                    if(minRate >= 60){
+                        response += ". Será mejor que te calmes un poco, ¡no te fuerces tanto!\n";
+                    }
+                    else response += "\n";
+                }
+
+                break;
+            case "P":
+                response += "bien!\n";
+                break;
+            case "NEU":
+            case "NONE":
+                response += "normal\n";
+                break;
+            case "N":
+                response += "mal\n";
+                break;
+            case "N+":
+                response += "muy mal\n";
+                break;
+        }
+
+        responseText.setText(response);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // Call Lollipop+ function
+            ttobj.speak(response, TextToSpeech.QUEUE_FLUSH, null, null) ;
+        }
+        else {
+            // Call Legacy function
+            ttobj.speak(response, TextToSpeech.QUEUE_FLUSH, null);
+        }
+    }
+
+    private void getMinMaxRates(){
         LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
         String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         activityTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid()).child(stringDate);
 
-        switch (feeling){
-            case "P+":
-                response += "estupendamente!";
-                break;
-            case "P":
-                response += "bien!";
-                break;
-            case "NEU":
-                response += "normal";
-                break;
-            case "N":
-                response += "mal";
-                break;
-            case "N+":
-                response += "muy mal";
-                break;
-        }
-
-        response+="\n";
-
         activityTable.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+
                 if(snapshot.child("Average Heart Rate").exists()){
 
+                }
+                if(snapshot.child("Heart Rates").exists()){
+                    for(DataSnapshot rate : snapshot.child("Heart Rates").getChildren()){
+                        if(rate.getValue(int.class) > maxRate) maxRate = rate.getValue(int.class);
+                        if(rate.getValue(int.class) < minRate) minRate = rate.getValue(int.class);
+                    }
                 }
             }
 
@@ -338,9 +385,5 @@ public class MeaningCloud extends Fragment {
 
             }
         });
-
-        testText.setText("Resultados");
-        responseText.setText(response);
-
     }
 }

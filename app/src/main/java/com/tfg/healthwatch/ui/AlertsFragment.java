@@ -38,6 +38,9 @@ import com.tfg.healthwatch.MainActivity;
 import com.tfg.healthwatch.R;
 import com.tfg.healthwatch.ui.dummy.DummyContent;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class AlertsFragment extends Fragment {
 
@@ -45,8 +48,8 @@ public class AlertsFragment extends Fragment {
     private FirebaseUser currentUser;
     private DatabaseReference userAlerts;
     private ConstraintLayout mSOSButton;
-    private CheckBox mFallCheckbox,weightCheckbox,heartRateCheckbox,batteryCheckbox, phoneCheckbox;
-    private EditText weightEdit,heartRateEdit,batteryEdit, phoneEdit;
+    private CheckBox mFallCheckbox,stepsCheckbox,heartRateCheckbox,batteryCheckbox, phoneCheckbox;
+    private EditText stepsEdit,heartRateEdit,batteryEdit, phoneEdit;
     private String phoneNumber = null;
 
     @Override
@@ -63,117 +66,103 @@ public class AlertsFragment extends Fragment {
 
         mSOSButton = root.findViewById(R.id.sos_layout);
         mFallCheckbox = root.findViewById(R.id.falls_checkbox);
-        weightCheckbox = root.findViewById(R.id.weight_check_box);
+        stepsCheckbox = root.findViewById(R.id.steps_check_box);
         heartRateCheckbox = root.findViewById(R.id.heart_rate_checkbox);
         batteryCheckbox = root.findViewById(R.id.battery_checkbox);
         phoneCheckbox = root.findViewById(R.id.phone_checkbox);
-        weightEdit = root.findViewById(R.id.weight_edit_text);
+        stepsEdit = root.findViewById(R.id.steps_edit_text);
         heartRateEdit = root.findViewById(R.id.heart_rate_edit_text);
         batteryEdit = root.findViewById(R.id.battery_edit_text);
         phoneEdit = root.findViewById(R.id.phone_edit_text);
 
-        userAlerts.child("fallSensor").addValueEventListener(new ValueEventListener() {
+        userAlerts.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String checked = snapshot.child("checked").toString();
 
-                if(!checked.isEmpty()) mFallCheckbox.setChecked((Boolean) snapshot.child("checked").getValue());
-            }
+                Map newPost = new HashMap();
+                newPost.put("limit",0);
+                newPost.put("checked",false);
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG,"Read weight failed: \n" + error);
-            }
-        });
+                if(snapshot.child("fallSensor").exists()){
+                    String checked = snapshot.child("fallSensor").child("checked").toString();
 
-        userAlerts.child("weight").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String limit = snapshot.child("limit").getValue().toString();
-                String checked = snapshot.child("checked").getValue().toString();
+                    if(!checked.isEmpty()) mFallCheckbox.setChecked((Boolean) snapshot.child("fallSensor").child("checked").getValue());
+                }
+                else userAlerts.child("fallSensor").child("checked").setValue(false);
 
-                if(!limit.isEmpty()){
-                    weightEdit.setText(limit);
-                    if(!checked.isEmpty()) weightCheckbox.setChecked((Boolean) snapshot.child("checked").getValue());
+                if(snapshot.child("steps").exists()){
+                    String limit = snapshot.child("steps").child("limit").getValue().toString();
+                    String checked = snapshot.child("steps").child("checked").getValue().toString();
+
+                    if(!limit.isEmpty()){
+                        stepsEdit.setText(limit);
+                        if(!checked.isEmpty()) stepsCheckbox.setChecked((Boolean) snapshot.child("steps").child("checked").getValue());
+                    }
+                    else{
+                        stepsCheckbox.setChecked(false);
+                        userAlerts.child("steps").child("checked").setValue(false);
+                    }
                 }
                 else{
-                    weightCheckbox.setChecked(false);
-                    userAlerts.child("weight").child("checked").setValue(false);
+                    userAlerts.child("steps").setValue(newPost);
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG,"Read weight failed: \n" + error);
-            }
-        });
+                if(snapshot.child("heartRate").exists()){
+                    String limit = snapshot.child("heartRate").child("limit").getValue().toString();
+                    String checked = snapshot.child("heartRate").child("checked").getValue().toString();
 
-        userAlerts.child("heartRate").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String limit = snapshot.child("limit").getValue().toString();
-                String checked = snapshot.child("checked").getValue().toString();
-
-                if(!limit.isEmpty()){
-                    heartRateEdit.setText(limit);
-                    if(!checked.isEmpty()) heartRateCheckbox.setChecked((Boolean) snapshot.child("checked").getValue());
+                    if(!limit.isEmpty()){
+                        heartRateEdit.setText(limit);
+                        if(!checked.isEmpty()) heartRateCheckbox.setChecked((Boolean) snapshot.child("heartRate").child("checked").getValue());
+                    }
+                    else{
+                        heartRateCheckbox.setChecked(false);
+                        userAlerts.child("heartRate").child("checked").setValue(false);
+                    }
                 }
                 else{
-                    heartRateCheckbox.setChecked(false);
-                    userAlerts.child("heartRate").child("checked").setValue(false);
+                    userAlerts.child("heartRate").setValue(newPost);
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG,"Read heartRate failed: \n" + error);
-            }
-        });
+                if(snapshot.child("battery").exists()){
+                    String limit = snapshot.child("battery").child("limit").getValue().toString();
+                    String checked = snapshot.child("battery").child("checked").getValue().toString();
 
-        userAlerts.child("battery").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String limit = snapshot.child("limit").getValue().toString();
-                String checked = snapshot.child("checked").getValue().toString();
-
-                if(!limit.isEmpty()){
-                    batteryEdit.setText(limit);
-                    if(!checked.isEmpty()) batteryCheckbox.setChecked((Boolean) snapshot.child("checked").getValue());
+                    if(!limit.isEmpty()){
+                        batteryEdit.setText(limit);
+                        if(!checked.isEmpty()) batteryCheckbox.setChecked((Boolean) snapshot.child("battery").child("checked").getValue());
+                    }
+                    else{
+                        batteryCheckbox.setChecked(false);
+                        userAlerts.child("battery").child("battery").child("checked").setValue(false);
+                    }
                 }
                 else{
-                    batteryCheckbox.setChecked(false);
-                    userAlerts.child("battery").child("checked").setValue(false);
+                    userAlerts.child("battery").setValue(newPost);
                 }
 
-            }
+                if(snapshot.child("emergencyNumber").exists()){
+                    String limit = snapshot.child("emergencyNumber").child("limit").getValue().toString();
+                    String checked = snapshot.child("emergencyNumber").child("checked").getValue().toString();
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG,"Read weight failed: \n" + error);
-            }
-        });
-
-        userAlerts.child("emergencyNumber").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String limit = snapshot.child("limit").getValue().toString();
-                String checked = snapshot.child("checked").getValue().toString();
-
-                if(!limit.isEmpty()){
-                    phoneEdit.setText(limit);
-                    phoneNumber = limit;
-                    if(!checked.isEmpty()) phoneCheckbox.setChecked((Boolean) snapshot.child("checked").getValue());
+                    if(!limit.isEmpty()){
+                        phoneEdit.setText(limit);
+                        phoneNumber = limit;
+                        if(!checked.isEmpty()) phoneCheckbox.setChecked((Boolean) snapshot.child("emergencyNumber").child("checked").getValue());
+                    }
+                    else{
+                        phoneCheckbox.setChecked(false);
+                        userAlerts.child("emergencyNumber").child("checked").setValue(false);
+                    }
                 }
                 else{
-                    phoneCheckbox.setChecked(false);
-                    userAlerts.child("emergencyNumber").child("checked").setValue(false);
+                    userAlerts.child("emergencyNumber").setValue(newPost);
                 }
-
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e(TAG,"Read weight failed: \n" + error);
+                Log.e(TAG,"Read falling service failed: \n" + error);
             }
         });
 
@@ -202,10 +191,10 @@ public class AlertsFragment extends Fragment {
             }
         });
 
-        weightCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
+        stepsCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener(){
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                userAlerts.child("weight").child("checked").setValue(isChecked);
+                userAlerts.child("steps").child("checked").setValue(isChecked);
             }
         });
 
@@ -231,13 +220,13 @@ public class AlertsFragment extends Fragment {
         });
 
 
-        weightEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        stepsEdit.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if(!hasFocus){
-                    String value = weightEdit.getText().toString();
+                    String value = stepsEdit.getText().toString();
                     if(!value.isEmpty()){
-                        userAlerts.child("weight").child("limit").setValue(value);
+                        userAlerts.child("steps").child("limit").setValue(value);
                     }
                 }
             }
