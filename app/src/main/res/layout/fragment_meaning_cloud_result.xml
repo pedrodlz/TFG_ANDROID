@@ -50,40 +50,46 @@
             android:id="@+id/constraintLayout8"
             android:layout_width="237dp"
             android:layout_height="74dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="28dp"
             android:background="@drawable/test_button_container"
             android:elevation="6dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/cancel_test_button"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginStart="16dp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
                 android:src="@drawable/ic_delete_svgrepo_com"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:tint="@color/error" />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/microphone_response_button"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginStart="12dp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
                 android:src="@drawable/ic_microphone_svgrepo_com"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/cancel_test_button"
                 app:layout_constraintTop_toTopOf="parent"
-                app:tint="@color/third" />
+                app:tint="@color/custom_dark_grey" />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/save_response_button"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginEnd="16dp"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
                 android:src="@drawable/ic_tick_svgrepo_com"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

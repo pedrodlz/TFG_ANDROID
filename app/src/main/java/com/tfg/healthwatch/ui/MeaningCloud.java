@@ -49,7 +49,9 @@ import org.json.JSONObject;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
 
 
 public class MeaningCloud extends Fragment {
@@ -66,7 +68,6 @@ public class MeaningCloud extends Fragment {
     private SpeechRecognizer speechRecognizer;
     private ImageView cancelButton, microphoneButton, saveButton;
     private ArrayList<String> positive = new ArrayList<String>();
-    private ArrayList<String> neutral = new ArrayList<String>();
     private ArrayList<String> negative = new ArrayList<String>();
     private int maxRate=-1, minRate=-1, avgRate=-1;
     private TextToSpeech ttobj;
@@ -125,7 +126,8 @@ public class MeaningCloud extends Fragment {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                responseText.setText("");
+                ttobj.stop();
             }
         });
 
@@ -161,13 +163,14 @@ public class MeaningCloud extends Fragment {
 
             @Override
             public void onEndOfSpeech() {
-
+                microphoneButton.setColorFilter(getResources().getColor(R.color.custom_dark_grey));
             }
 
             @Override
             public void onError(int error) {
                 //microphoneButton.setImageResource(R.drawable.ic_baseline_mic_off_24);
                 Log.e(TAG, String.valueOf(error));
+                microphoneStatus.setText("Error");
             }
 
             @Override
@@ -198,7 +201,7 @@ public class MeaningCloud extends Fragment {
                     speechRecognizer.stopListening();
                 }
                 if (event.getAction() == MotionEvent.ACTION_DOWN){
-                    //microphoneButton.setImageResource(R.drawable.ic_baseline_mic_24);
+                    microphoneButton.setColorFilter(getResources().getColor(R.color.third));
                     speechRecognizer.startListening(speechRecognizerIntent);
                 }
 
@@ -305,15 +308,15 @@ public class MeaningCloud extends Fragment {
         switch(score){
             case "P+":
             case "P":
-                positive.add(value);
-                break;
-            case "NEU":
-            case "NONE":
-                neutral.add(value);
+                if (!positive.contains(value)) {
+                    positive.add(value);
+                }
                 break;
             case "N":
             case "N+":
-                negative.add(value);
+                if (!negative.contains(value)) {
+                    negative.add(value);
+                }
                 break;
         }
     }
@@ -332,12 +335,12 @@ public class MeaningCloud extends Fragment {
 
                 if(maxRate >= avgRate+30){
                     highRate = true;
-                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de" + maxRate + ".\n";
+                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de " + maxRate + ".\n";
                     response += "Si has hecho deporte es algo normal, pero si has mantenido reposo "+
                             "deberías tener cuidado y vigilar tu estado de salud. Un alto nivel en tu " +
                             "frecuencia cardiovascular y estado de ánimo puede deberse a alguna buena " +
                             "noticia o una sorpresa insesperada! No te excites demasiado e intentar calmarte. " +
-                            "Si en unos días sigue así es recomendable que acudas a tu médico de cabecera\n";
+                            "Si en unos días sigue así es recomendable que acudas a tu médico de cabecera.\n";
                 }
 
                 if(minRate <= avgRate-30){
@@ -356,7 +359,7 @@ public class MeaningCloud extends Fragment {
                 if(!highRate && !lowRate){
                     response += "¡Me alegro de que estés bien! Hoy has tenido un día normal sin ningún cambio " +
                             "de salud importante. Tus pulsaciones se han mantenido muy bien en la media y no hay " +
-                            "cambios bruscos destacables. ¡Sigue así! ¡Lo estás haciendo muy bien!";
+                            "cambios bruscos destacables. ¡Sigue así! ¡Lo estás haciendo muy bien!\n";
                 }
 
                 break;
@@ -366,12 +369,12 @@ public class MeaningCloud extends Fragment {
 
                 if(maxRate >= avgRate+30){
                     highRate = true;
-                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de" + maxRate + ".\n";
+                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de " + maxRate + ".\n";
                     response += "Si has hecho deporte es algo normal, pero si has mantenido reposo "+
                             "deberías tener cuidado y vigilar tu estado de salud. Un alto nivel en tu " +
                             "frecuencia cardiovascular puede deberse a una alteración fisiológica o posible "+
                             "enfermedad cardiovascular. Es importante descartar esta opción, por lo que "+
-                            "si en unos días sigue así es recomendable que acudas a tu médico de cabecera\n";
+                            "si en unos días sigue así es recomendable que acudas a tu médico de cabecera.\n";
                 }
 
                 if(minRate <= avgRate-30){
@@ -391,7 +394,7 @@ public class MeaningCloud extends Fragment {
                     response += "Hoy has tenido un día normal sin ningún cambio de salud importante. " +
                             "Tus pulsaciones se han mantenido muy bien en la media y no hay cambios bruscos "+
                             "destacables. Además tu estado emocional es neutro, si quieres mejorarlo, una buena "+
-                            "forma de hacerlo es mediante el deporte. ¡Mucho ánimo!";
+                            "forma de hacerlo es mediante el deporte. ¡Mucho ánimo!\n";
                 }
                 break;
             case "N":
@@ -399,14 +402,14 @@ public class MeaningCloud extends Fragment {
                 response += "mal.\n";
                 if(maxRate >= avgRate+30){
                     highRate = true;
-                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de" + maxRate + ".\n";
+                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de " + maxRate + ".\n";
                     response += "Si has hecho deporte es algo normal, pero si has mantenido reposo "+
                             "deberías tener cuidado y vigilar tu estado de salud. Un alto nivel en tu " +
                             "frecuencia cardiovascular y un mal estado de ánimo puede deberse a "+
                             "que estás triste o a una posible depresión. La tristeza provoca un alto "+
                             "nivel de pulsaciones, ya que al estar triste nuestro cuerpo libera adrenalina. " +
                             "También puede deberse a situaciones de miedo y/o estrés. Si en unos días sigues así "+
-                            "es recomendable que acudas a un psicólogo o a tu médico de cabecera\n";
+                            "es recomendable que acudas a un psicólogo o a tu médico de cabecera.\n";
                 }
 
                 if(minRate <= avgRate-30){
@@ -429,9 +432,32 @@ public class MeaningCloud extends Fragment {
                             "y ayuda. Por otro lado también puedes acudir a un psicólogo que te ayudará seguro! "+
                             "En cuanto a las pulsaciones, hoy has tenido un día estable sin ningún cambio de salud importante. " +
                             "Tus pulsaciones se han mantenido muy bien en la media y no hay cambios bruscos "+
-                            "destacables. Además si quieres mejorarlo, una buena forma de hacerlo es mediante el deporte. ¡Mucho ánimo!";
+                            "destacables. Además si quieres mejorarlo, una buena forma de hacerlo es mediante el deporte. ¡Mucho ánimo!\n";
                 }
                 break;
+        }
+
+        if(positive.size() > 0 || negative.size() > 0){
+            boolean pos = false,neg = false;
+            response += "\nFinalmente, también es destacable añadir los elementos que, según mi analisis, te afectan";
+
+            if(positive.size() > 0){
+                pos = true;
+                response += " positivamente como ";
+
+                for(String word : positive){
+                    response += word + ", ";
+                }
+            }
+
+            if(negative.size() > 0){
+                if(pos) response += ". Y negativamente como ";
+                else response+= " negativamente como ";
+
+                for(String word : negative){
+                    response += word + ", ";
+                }
+            }
         }
 
         responseText.setText(response);
