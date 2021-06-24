@@ -38,18 +38,6 @@ public class MainActivity extends AppCompatActivity {
         createNotificationChannel();
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
         startActivity(intent);
-        /*getSupportActionBar().hide();
-        setContentView(R.layout.activity_main);
-
-        loginBtn = findViewById(R.id.go_to_login_btn);
-
-        loginBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(intent);
-            }
-        });*/
     }
 
     @Override
@@ -62,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "HealthWatch Notification Channel";
-            String description = "This is the main channel";
+            CharSequence name = "Alerts notifications";
+            String description = "Notification channel for alerts established by users";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
             channel.setDescription(description);
@@ -71,15 +59,6 @@ public class MainActivity extends AppCompatActivity {
             // or other notification behaviors after this
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setSmallIcon(R.mipmap.ic_launcher_round)
-                    .setContentTitle("Low Battery")
-                    .setContentText("Battery has gone under 15%")
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-            // notificationId is a unique int for each notification that you must define
-            notificationManager.notify(1, builder.build());
         }
     }
 

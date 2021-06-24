@@ -68,7 +68,7 @@ public class MeaningCloud extends Fragment {
     private ArrayList<String> positive = new ArrayList<String>();
     private ArrayList<String> neutral = new ArrayList<String>();
     private ArrayList<String> negative = new ArrayList<String>();
-    private int maxRate=0, minRate=0;
+    private int maxRate=-1, minRate=-1, avgRate=-1;
     private TextToSpeech ttobj;
 
     public MeaningCloud() {
@@ -94,6 +94,8 @@ public class MeaningCloud extends Fragment {
                 }
             }
         });
+
+        getMinMaxRates();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -207,6 +209,12 @@ public class MeaningCloud extends Fragment {
         return root;
     }
 
+    @Override
+    public void onDestroy() {
+        ttobj.stop();
+        super.onDestroy();
+    }
+
     private void checkPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             ActivityCompat.requestPermissions(getActivity(),new String[]{
@@ -276,7 +284,6 @@ public class MeaningCloud extends Fragment {
         Log.d(TAG,"API results: "+ resultsObject);
         feeling = resultsObject.getString("score_tag");
         responseData.child("textFeeling").setValue(feeling);
-        getMinMaxRates();
 
         JSONArray entityList = new JSONArray(resultsObject.getString("sentimented_entity_list"));
         JSONArray conceptList = new JSONArray(resultsObject.getString("sentimented_concept_list"));
@@ -313,37 +320,117 @@ public class MeaningCloud extends Fragment {
 
     private void buildResponseToUser(){
 
-        String response= "¡Hola! Según mi análisis veo que estás ";
-        Log.d(TAG,"Max heart rate: "+maxRate);
-        Log.d(TAG,"Min heart rate: "+minRate);
+        String response= "¡Hola! Según mi análisis puedo concluir que estás ";
+        boolean highRate = false;
+        boolean lowRate = false;
+
 
         switch (feeling){
             case "P+":
-                response += "estupendamente!\n";
+            case "P":
+                response += "bien!\n";
 
-                if(maxRate >= 90){
-                    response += "¡Y ya lo creo que si! " +
-                            "Has tenido un pico de pulsaciones de " +
-                            maxRate;
-                    if(minRate >= 60){
-                        response += ". Será mejor que te calmes un poco, ¡no te fuerces tanto!\n";
-                    }
-                    else response += "\n";
+                if(maxRate >= avgRate+30){
+                    highRate = true;
+                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de" + maxRate + ".\n";
+                    response += "Si has hecho deporte es algo normal, pero si has mantenido reposo "+
+                            "deberías tener cuidado y vigilar tu estado de salud. Un alto nivel en tu " +
+                            "frecuencia cardiovascular y estado de ánimo puede deberse a alguna buena " +
+                            "noticia o una sorpresa insesperada! No te excites demasiado e intentar calmarte. " +
+                            "Si en unos días sigue así es recomendable que acudas a tu médico de cabecera\n";
+                }
+
+                if(minRate <= avgRate-30){
+                    lowRate = true;
+                    if(highRate) response += "Además de tener las pulsaciones altas, también estoy viendo ";
+                    else response += "Veo ";
+
+                    response += "que en algún momento del día has tenido las pulsaciones bajas, con un pico de " + minRate + ".\n";
+                    response += "Esta bajada de pulsaciones puede deberse a que has alcanzado un nivel de " +
+                                "salud muy bueno si has estado haciendo deporte y poniéndote en forma, ¡sigue asi!\n";
+                    response += "La tranquilidad y un buen estado de ánimo favorece la salud del corazón. ";
+                    response += "Sin embargo, si tienes las pulsaciones bajas durante varios días y además " +
+                                "tienes sensaciones de mareo, náuseas o vómitos, es mejor que acudas a tu médico.\n";
+                }
+
+                if(!highRate && !lowRate){
+                    response += "¡Me alegro de que estés bien! Hoy has tenido un día normal sin ningún cambio " +
+                            "de salud importante. Tus pulsaciones se han mantenido muy bien en la media y no hay " +
+                            "cambios bruscos destacables. ¡Sigue así! ¡Lo estás haciendo muy bien!";
                 }
 
                 break;
-            case "P":
-                response += "bien!\n";
-                break;
             case "NEU":
             case "NONE":
-                response += "normal\n";
+                response += "normal.\n";
+
+                if(maxRate >= avgRate+30){
+                    highRate = true;
+                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de" + maxRate + ".\n";
+                    response += "Si has hecho deporte es algo normal, pero si has mantenido reposo "+
+                            "deberías tener cuidado y vigilar tu estado de salud. Un alto nivel en tu " +
+                            "frecuencia cardiovascular puede deberse a una alteración fisiológica o posible "+
+                            "enfermedad cardiovascular. Es importante descartar esta opción, por lo que "+
+                            "si en unos días sigue así es recomendable que acudas a tu médico de cabecera\n";
+                }
+
+                if(minRate <= avgRate-30){
+                    lowRate = true;
+                    if(highRate) response += "Además de tener las pulsaciones altas, también estoy viendo ";
+                    else response += "Veo ";
+
+                    response += "que en algún momento del día has tenido las pulsaciones bajas, con un pico de " + minRate + ".\n";
+                    response += "Esta bajada de pulsaciones puede deberse a que hayas alcanzado un buen nivel de " +
+                            "salud, es posible que la adquisición de mejores hábitos haya reducido la presión arterial. ";
+                    response += "La tranquilidad y un buen estado de ánimo favorece la salud del corazón.\n";
+                    response += "Sin embargo, si tienes las pulsaciones bajas durante varios días y además " +
+                            "tienes sensaciones de mareo, náuseas o vómitos, es mejor que acudas a tu médico.\n";
+                }
+
+                if(!highRate && !lowRate){
+                    response += "Hoy has tenido un día normal sin ningún cambio de salud importante. " +
+                            "Tus pulsaciones se han mantenido muy bien en la media y no hay cambios bruscos "+
+                            "destacables. Además tu estado emocional es neutro, si quieres mejorarlo, una buena "+
+                            "forma de hacerlo es mediante el deporte. ¡Mucho ánimo!";
+                }
                 break;
             case "N":
-                response += "mal\n";
-                break;
             case "N+":
-                response += "muy mal\n";
+                response += "mal.\n";
+                if(maxRate >= avgRate+30){
+                    highRate = true;
+                    response += "Veo que en algún momento del día has tenido las pulsaciones altas con un pico de" + maxRate + ".\n";
+                    response += "Si has hecho deporte es algo normal, pero si has mantenido reposo "+
+                            "deberías tener cuidado y vigilar tu estado de salud. Un alto nivel en tu " +
+                            "frecuencia cardiovascular y un mal estado de ánimo puede deberse a "+
+                            "que estás triste o a una posible depresión. La tristeza provoca un alto "+
+                            "nivel de pulsaciones, ya que al estar triste nuestro cuerpo libera adrenalina. " +
+                            "También puede deberse a situaciones de miedo y/o estrés. Si en unos días sigues así "+
+                            "es recomendable que acudas a un psicólogo o a tu médico de cabecera\n";
+                }
+
+                if(minRate <= avgRate-30){
+                    lowRate = true;
+                    if(highRate) response += "Además de tener las pulsaciones altas, también estoy viendo ";
+                    else response += "Veo ";
+
+                    response += "que en algún momento del día has tenido las pulsaciones bajas, con un pico de " + minRate + ".\n";
+                    response += "Esta bajada de pulsaciones puede deberse a que hayas alcanzado un nivel de " +
+                            "salud, es posible que la adquisición de mejores hábitos haya reducido la presión arterial.\n";
+                    response += "Sin embargo,tambien puede deberse a que el corazón no esté bombeando suficiente sangre "+
+                            " y oxígeno, lo que puede causar fatiga y otros síntomas del malestar.\n";
+                    response += "Si tienes las pulsaciones bajas durante varios días y además " +
+                            "tienes sensaciones de mareo, náuseas, vómitos o malestares, es mejor que acudas a tu médico.\n";
+                }
+
+                if(!highRate && !lowRate){
+                    response += "Me preocupa que hayas tenido un mal día. Si hay algo que te preocupa o "+
+                            "inquieta es importante contar con la familia y amigos para pedirles consejo "+
+                            "y ayuda. Por otro lado también puedes acudir a un psicólogo que te ayudará seguro! "+
+                            "En cuanto a las pulsaciones, hoy has tenido un día estable sin ningún cambio de salud importante. " +
+                            "Tus pulsaciones se han mantenido muy bien en la media y no hay cambios bruscos "+
+                            "destacables. Además si quieres mejorarlo, una buena forma de hacerlo es mediante el deporte. ¡Mucho ánimo!";
+                }
                 break;
         }
 
@@ -359,6 +446,7 @@ public class MeaningCloud extends Fragment {
     }
 
     private void getMinMaxRates(){
+        Log.d(TAG,"getMinMaxRates()");
         LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
         String stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
 
@@ -370,13 +458,18 @@ public class MeaningCloud extends Fragment {
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
 
                 if(snapshot.child("Average Heart Rate").exists()){
-
+                    avgRate = snapshot.child("Average Heart Rate").getValue(int.class);
+                    Log.d(TAG,"Average Heart Rate: "+avgRate);
                 }
                 if(snapshot.child("Heart Rates").exists()){
                     for(DataSnapshot rate : snapshot.child("Heart Rates").getChildren()){
+                        if(maxRate == -1) maxRate = rate.getValue(int.class);
+                        if(minRate == -1) minRate = rate.getValue(int.class);
                         if(rate.getValue(int.class) > maxRate) maxRate = rate.getValue(int.class);
                         if(rate.getValue(int.class) < minRate) minRate = rate.getValue(int.class);
                     }
+                    Log.d(TAG,"Max heart rate: "+maxRate);
+                    Log.d(TAG,"Min heart rate: "+minRate);
                 }
             }
 

@@ -123,6 +123,7 @@ public class HomeFragment extends Fragment {
 
                 graph.getViewport().setScrollable(true); // enables horizontal scrolling
                 graph.getViewport().setScrollableY(true); // enables vertical scrolling
+                graph.getViewport().setScalable(true);
                 graph.setTitle("Pulsaciones medias");
                 graph.setTitleColor(R.color.custom_dark_grey);
                 graph.getGridLabelRenderer().setGridColor(R.color.custom_dark_grey);

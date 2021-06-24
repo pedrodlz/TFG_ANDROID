@@ -33,6 +33,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -174,7 +175,7 @@ public class BLEService extends Service {
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         activityTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid()).child(stringDate);
-        alertsTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid());
+        alertsTable = FirebaseDatabase.getInstance().getReference().child("Alerts").child(currentUser.getUid());
 
         alertsTable.addValueEventListener(new ValueEventListener() {
             @Override
@@ -190,8 +191,9 @@ public class BLEService extends Service {
                     String checked = snapshot.child("steps").child("checked").getValue().toString();
 
                     if(!limit.isEmpty()){
-                        stepsLimit = limit;
                         if(!checked.isEmpty()) stepsChecked = (Boolean) snapshot.child("steps").child("checked").getValue();
+                        if(stepsLimit != limit) getSteps();
+                        stepsLimit = limit;
                     }
                     else{
                         stepsChecked =false;
@@ -218,6 +220,7 @@ public class BLEService extends Service {
                     if(!limit.isEmpty()){
                         batteryLimit = limit;
                         if(!checked.isEmpty()) batteryChecked=(Boolean) snapshot.child("battery").child("checked").getValue();
+                        getbattery();
                     }
                     else{
                         batteryChecked = false;
@@ -417,6 +420,12 @@ public class BLEService extends Service {
             activityTable.child("Steps").setValue(steps);
             activityTable.child("Distance").setValue(distance);
             activityTable.child("Calories").setValue(calories);
+
+            if(stepsLimit != null && stepsChecked){
+                if(steps >= Integer.parseInt(stepsLimit)){
+                    createNotification(R.drawable.ic_footprint_svgrepo_com,"Steps alert","You have reached your daily steps goal!",2);
+                }
+            }
         }
 
     }
@@ -631,12 +640,24 @@ public class BLEService extends Service {
     public void readBatteryLevel(BluetoothGattCharacteristic characteristic){
         String batteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0).toString();
 
-        if(batteryLimit != null){
-            if(batteryChecked && characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0) <= 15){
-
+        if(batteryLimit != null && batteryChecked) {
+            if (characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0) <= Integer.parseInt(batteryLimit)) {
+                createNotification(R.drawable.ic_low_battery_svgrepo_com,"Battery alert","Battery has gone under "+batteryLimit+"%",1);
             }
         }
 
         sendBroadcast(new Intent(BATTERY_INTENT).putExtra("batteryLevel",batteryLevel));
+    }
+
+    private void createNotification(int icon, String title, String text, int id){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(icon)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        // notificationId is a unique int for each notification that you must define
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(id, builder.build());
     }
 }
