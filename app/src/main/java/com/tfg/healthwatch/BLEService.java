@@ -1,5 +1,6 @@
 package com.tfg.healthwatch;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -22,6 +23,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -32,6 +34,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
@@ -76,9 +79,7 @@ public class BLEService extends Service {
     private DatabaseReference activityTable;
     private DatabaseReference alertsTable;
     private String stepsLimit, heartRateLimit,batteryLimit,emergencyNumber;
-    private Boolean fallingChecked, stepsChecked, heartRatesChecked, batteryChecked, emergencyChecked;
-    private Integer currentTotalHeartRate = 0;
-    private int totalHeartRates = 0;
+    private Boolean stepsChecked, heartRatesChecked, batteryChecked, emergencyChecked;
     private String TAG = "BLEService";
     private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
     private static String CONNECTED_LIST_INTENT = "com.tfg.healthwatch.CONNECTED_LIST";
@@ -115,7 +116,7 @@ public class BLEService extends Service {
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        BLEService getService() {
+        public BLEService getService() {
             // Return this instance of LocalService so clients can call public methods
             return BLEService.this;
         }
@@ -131,7 +132,6 @@ public class BLEService extends Service {
         initialize();
         getConnectedDevices();
         getbattery();
-        getSteps();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -180,12 +180,6 @@ public class BLEService extends Service {
         alertsTable.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                if(snapshot.child("fallSensor").exists()){
-                    String checked = snapshot.child("fallSensor").child("checked").toString();
-                    if(!checked.isEmpty()) fallingChecked = (Boolean) snapshot.child("fallSensor").child("checked").getValue();
-                }
-                else fallingChecked = false;
-
                 if(snapshot.child("steps").exists()){
                     String limit = snapshot.child("steps").child("limit").getValue().toString();
                     String checked = snapshot.child("steps").child("checked").getValue().toString();
@@ -259,10 +253,9 @@ public class BLEService extends Service {
 
     @Override
     public void onDestroy(){
-        super.onDestroy();
-        Log.d(TAG,"onDestroy service");
         unregisterReceiver(receiver);
         stopNotifications();
+        super.onDestroy();
     }
 
     public boolean checkBluetooh(){
@@ -389,7 +382,6 @@ public class BLEService extends Service {
                 UUID charUUID = characteristic.getUuid();
                 if(charUUID.equals(BATTERY_LEVEL_UUID)){
                     readBatteryLevel(characteristic);
-                    getSteps();
                 }
                 else if(charUUID.equals(UUID_CHARACTERISTIC_REALTIME_STEPS)){
                     readSteps(characteristic);
@@ -427,11 +419,9 @@ public class BLEService extends Service {
                 }
             }
         }
-
     }
 
     public void stopNotifications(){
-
         if(heartRateNotificationOn){
             BluetoothGattCharacteristic characteristic = mBluetoothGatt.getService(HEART_RATE_SERVICE).getCharacteristic(UUID_HEART_RATE_MEASUREMENT);
             mBluetoothGatt.setCharacteristicNotification(characteristic,false);
@@ -482,6 +472,7 @@ public class BLEService extends Service {
                 Log.d(TAG, "Battery level not found!");
                 return;
             }
+
             mBluetoothGatt.readCharacteristic(batteryLevel);
         }
     }
@@ -492,17 +483,16 @@ public class BLEService extends Service {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.child("Heart Rates").exists()){
-                    totalHeartRates = (int) snapshot.child("Heart Rates").getChildrenCount();
-                    currentTotalHeartRate = 0;
+                    int totalHeartRates = (int) snapshot.child("Heart Rates").getChildrenCount();
                     Integer avgHeartRate = 0;
 
                     for (DataSnapshot child: snapshot.child("Heart Rates").getChildren()) {
                         Integer rate = child.getValue(Integer.class);
-                        currentTotalHeartRate += rate;
+                        avgHeartRate += rate;
                     }
-                    avgHeartRate = currentTotalHeartRate / totalHeartRates;
+                    avgHeartRate = avgHeartRate / totalHeartRates;
 
-                    if(avgHeartRate != null){
+                    if(avgHeartRate != 0){
                         activityTable.child("Average Heart Rate").setValue(avgHeartRate);
                     }
 
@@ -521,6 +511,7 @@ public class BLEService extends Service {
             }
         });
 
+        getSteps();
     }
 
     public void getSteps(){
@@ -539,12 +530,6 @@ public class BLEService extends Service {
             }
             mBluetoothGatt.readCharacteristic(stepsCharacteristic);
         }
-    }
-
-    public List<BluetoothGattService> getSupportedGattServices() {
-        if (mBluetoothGatt == null) return null;
-
-        return mBluetoothGatt.getServices();
     }
 
     public void getConnectedDevices(){
@@ -627,8 +612,17 @@ public class BLEService extends Service {
             }
 
             Integer heartRate = characteristic.getIntValue(format,1);
-
             activityTable.child("Heart Rates").push().setValue(heartRate);
+
+            if(heartRateLimit != null && heartRatesChecked) {
+
+                if (heartRate >= Integer.parseInt(heartRateLimit)) {
+                    if(emergencyNumber != null && emergencyChecked){
+                        sendBroadcast(new Intent("com.tfg.healthwatch.EMERGENCY_CALL").putExtra("emergencyNumber",emergencyNumber));
+                    }
+                    else createNotification(R.drawable.ic_heartbeat_svgrepo_com,"Heart Rate alert","Heart rate has gone above "+heartRateLimit,3);
+                }
+            }
 
             sendBroadcast(new Intent("com.tfg.healthwatch.HEART_RATE").putExtra("heartRate",heartRate.toString()));
 

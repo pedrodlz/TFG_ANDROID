@@ -1,6 +1,7 @@
 package com.tfg.healthwatch;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -13,17 +14,21 @@ import androidx.navigation.ui.NavigationUI;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -46,28 +51,59 @@ import java.util.Locale;
 public class DashboardActivity extends AppCompatActivity {
 
     private static final String TAG = "DashboardActivity";
-    private static BLEService mServiceBLE;
-    private static FallingService mServiceFalling;
     private static NavController navController;
-    private ImageView mMicButton;
-    private EditText mResultText;
-    private Fragment mMyFragment;
-    boolean mBoundBLE = false;
-    boolean mBoundFalling = false;
     public static final int RecordAudioRequestCode = 1;
-    private SpeechRecognizer speechRecognizer;
-    static final String HEART_RATE_INTENT = "com.tfg.healthwatch.HEART_RATE";
+    public static final int CallRequestCode = 2;
+    public static final String emergencyIntent = "com.tfg.healthwatch.EMERGENCY_CALL";
+    public static final String fallIntent = "com.tfg.healthwatch.FALL_DETECTED";
+    private Boolean firstAlert = true;
 
     @Override
     public void onStart() {
         super.onStart();
         // Bind to LocalService
-        Intent intent = new Intent(this, BLEService.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
-
-        intent = new Intent(this, FallingService.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        startService(new Intent(this,BLEService.class));
+        startService(new Intent(this,FallingService.class));
     }
+
+    BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if((action.equals(emergencyIntent) || action.equals(fallIntent)) && firstAlert){
+                if (ActivityCompat.checkSelfPermission(DashboardActivity.this,
+                        Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                    firstAlert = false;
+                    String title = "Emergency";
+                    if(action.equals(emergencyIntent)) title = "High heart rate";
+                    else if(action.equals(fallIntent)) title = "Fall detected";
+
+                    new AlertDialog.Builder(DashboardActivity.this )
+                            .setTitle(title)
+                            .setMessage("Do you want to call your emergency number?")
+                            .setPositiveButton( "Yes" , new
+                                    DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick (DialogInterface paramDialogInterface , int paramInt) {
+                                            String phoneNumber = intent.getStringExtra("emergencyNumber");
+                                            Intent callIntent = new Intent(Intent.ACTION_CALL);
+                                            callIntent.setData(Uri.parse("tel:"+phoneNumber));
+                                            startActivity(callIntent);
+                                        }
+                                    })
+                            .setNegativeButton( "No" , new
+                                    DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick (DialogInterface paramDialogInterface , int paramInt) {
+                                            firstAlert = true;
+                                        }
+                                    })
+                            .show() ;
+                }
+            }
+        }
+    };
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -87,8 +123,8 @@ public class DashboardActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
 
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 1);
-
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RecordAudioRequestCode);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE}, CallRequestCode);
     }
 
     private void setBarColor(){
@@ -104,6 +140,11 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        IntentFilter params = new IntentFilter();
+        params.addAction(emergencyIntent);
+        params.addAction(fallIntent);
+        registerReceiver(receiver,params);
+
         startService(new Intent(this,BLEService.class));
         startService(new Intent(this,FallingService.class));
     }
@@ -111,6 +152,7 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterReceiver(receiver);
         stopService(new Intent(this,BLEService.class));
         stopService(new Intent(this,FallingService.class));
     }
@@ -118,9 +160,9 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     public void onDestroy(){
         super.onDestroy();
+        unregisterReceiver(receiver);
         stopService(new Intent(this,BLEService.class));
         stopService(new Intent(this,FallingService.class));
-        speechRecognizer.destroy();
     }
 
 
@@ -133,35 +175,9 @@ public class DashboardActivity extends AppCompatActivity {
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 Toast.makeText(this,"Permission Granted",Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private ServiceConnection connection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            String name = className.getShortClassName();
-            if(name.equals(".BLEService")){
-                BLEService.LocalBinder binder = (BLEService.LocalBinder) service;
-                mServiceBLE = binder.getService();
-                mBoundBLE = true;
-            }
-            else if(name.equals(".FallingService")){
-                FallingService.LocalBinder binder = (FallingService.LocalBinder) service;
-                mServiceFalling = binder.getService();
-                mBoundFalling = true;
-            }
-
+        if (requestCode == CallRequestCode && grantResults.length > 0 ){
+            if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                Toast.makeText(this,"Permission Granted",Toast.LENGTH_SHORT).show();
         }
-
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mBoundBLE = false;
-        }
-    };
-
-    public static BLEService getBleService(){
-        return mServiceBLE;
     }
 }

@@ -15,15 +15,18 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -49,6 +52,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.tfg.healthwatch.BLEService;
 import com.tfg.healthwatch.BluetoothListAdapter;
 import com.tfg.healthwatch.DashboardActivity;
+import com.tfg.healthwatch.FallingService;
 import com.tfg.healthwatch.R;
 
 import java.util.ArrayList;
@@ -67,6 +71,7 @@ public class BluetoothFragment extends Fragment{
     private static final String GET_CONNECTED_INTENT = "com.tfg.healthwatch.GET_CONNECTED";
     private static String CONNECTED_LIST_INTENT = "com.tfg.healthwatch.CONNECTED_LIST";
     private BLEService mService;
+    boolean mBoundBLE = false;
     private BluetoothListAdapter connectedAdapter;
     private BluetoothListAdapter scannedAdapter;
 
@@ -74,9 +79,10 @@ public class BluetoothFragment extends Fragment{
                              ViewGroup container, Bundle savedInstanceState) {
 
         root = inflater.inflate(R.layout.fragment_bluetooth, container, false);
-        mService = DashboardActivity.getBleService();
 
-        startListeners();
+        // Bind to LocalService
+        Intent intent = new Intent(getContext(), BLEService.class);
+        getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
 
         getContext().sendBroadcast(new Intent(GET_CONNECTED_INTENT));
 
@@ -110,7 +116,8 @@ public class BluetoothFragment extends Fragment{
         }
         if (!gps_enabled && !network_enabled) {
             new AlertDialog.Builder(getContext() )
-                    .setMessage( "GPS Enable" )
+                    .setTitle("GPS")
+                    .setMessage("Please, enable GPS in order to search for devices")
                     .setPositiveButton( "Settings" , new
                             DialogInterface.OnClickListener() {
                                 @Override
@@ -204,40 +211,42 @@ public class BluetoothFragment extends Fragment{
         Button searchButton = (Button) root.findViewById(R.id.search_button);
         ListView scannedDevices = root.findViewById(R.id.search_devices_list);
 
-        if(mService.checkBluetooh()){
-            bluetooth_switch.setChecked(true);
-        }
+        if(mService !=null){
+            if(mService.checkBluetooh()){
+                bluetooth_switch.setChecked(true);
+            }
 
-        scannedDevices.setOnItemClickListener(new AdapterView.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,int position, long id)
+            scannedDevices.setOnItemClickListener(new AdapterView.OnItemClickListener()
             {
-                String selected = ((TextView) view.findViewById(R.id.device_address)).getText().toString();
-                mService.connect(selected);
-            }
-        });
-
-        bluetooth_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b) {
-                    mService.requestBluetooth();
-                    if(!mService.checkBluetooh()) bluetooth_switch.setChecked(false);
-                } else {
-                    mService.disableBluetooth();
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view,int position, long id)
+                {
+                    String selected = ((TextView) view.findViewById(R.id.device_address)).getText().toString();
+                    mService.connect(selected);
                 }
-            }
-        });
+            });
 
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkPermission(Manifest.permission.ACCESS_FINE_LOCATION);
-                getContext().sendBroadcast(new Intent(SCAN_INTENT));
-                //getContext().sendBroadcast(new Intent(GET_CONNECTED_INTENT));
-            }
-        });
+            bluetooth_switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    if (b) {
+                        mService.requestBluetooth();
+                        if(!mService.checkBluetooh()) bluetooth_switch.setChecked(false);
+                    } else {
+                        mService.disableBluetooth();
+                    }
+                }
+            });
+
+            searchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+                    getContext().sendBroadcast(new Intent(SCAN_INTENT));
+                    //getContext().sendBroadcast(new Intent(GET_CONNECTED_INTENT));
+                }
+            });
+        }
     }
 
     @Override
@@ -247,11 +256,36 @@ public class BluetoothFragment extends Fragment{
         params.addAction(SCANNED_INTENT);
         params.addAction(CONNECTED_LIST_INTENT);
         getActivity().registerReceiver(receiver,params);
+
+        Intent intent = new Intent(getContext(), BLEService.class);
+        getActivity().bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     public void onPause(){
         super.onPause();
         getActivity().unregisterReceiver(receiver);
+        getActivity().unbindService(connection);
     }
+
+    private ServiceConnection connection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            String name = className.getShortClassName();
+            if(name.equals(".BLEService")){
+                BLEService.LocalBinder binder = (BLEService.LocalBinder) service;
+                mService = binder.getService();
+                mBoundBLE = true;
+                startListeners();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBoundBLE = false;
+        }
+    };
 }

@@ -36,7 +36,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.MainActivity;
 import com.tfg.healthwatch.R;
-import com.tfg.healthwatch.ui.dummy.DummyContent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -172,7 +171,6 @@ public class AlertsFragment extends Fragment {
             public void onClick(View v) {
 
                 if(!phoneNumber.isEmpty()){
-                    Log.d(TAG,"Phone NUmber: " + phoneNumber);
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
                     callIntent.setData(Uri.parse("tel:"+phoneNumber));
 

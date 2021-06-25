@@ -27,7 +27,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.tfg.healthwatch.R;
-import com.tfg.healthwatch.ui.dummy.DummyContent;
 
 import org.jetbrains.annotations.NotNull;
 

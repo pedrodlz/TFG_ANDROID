@@ -215,6 +215,7 @@ public class MeaningCloud extends Fragment {
     @Override
     public void onDestroy() {
         ttobj.stop();
+        speechRecognizer.destroy();
         super.onDestroy();
     }
 

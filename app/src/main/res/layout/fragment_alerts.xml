@@ -16,6 +16,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:button="@null"
+        android:background="@drawable/alert_item"
+        android:padding="5dp"
         android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
         android:fontFamily="@font/hind"
         android:text="@string/fall_alert"

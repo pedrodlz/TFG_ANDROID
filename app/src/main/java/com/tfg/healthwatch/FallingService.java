@@ -32,6 +32,7 @@ public class FallingService extends Service implements SensorEventListener {
     private SensorManager mSensorManager;
     private Sensor mGravity;
     private Boolean sensorActivated = false;
+    private String phoneNumber;
 
     public FallingService() {
     }
@@ -42,27 +43,33 @@ public class FallingService extends Service implements SensorEventListener {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         userAlerts = FirebaseDatabase.getInstance().getReference().child("Alerts").child(currentUser.getUid());
 
-        userAlerts.child("fallSensor").addValueEventListener(new ValueEventListener() {
+        userAlerts.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if(snapshot.child("checked").getValue() != null){
-                    String checked = snapshot.child("checked").getValue().toString();
+                if(snapshot.child("fallSensor").exists()){
+                    if(snapshot.child("fallSensor").child("checked").getValue() != null){
+                        String checked = snapshot.child("fallSensor").child("checked").getValue().toString();
 
-                    if(!checked.isEmpty()) sensorActivated = (Boolean) snapshot.child("checked").getValue();
+                        if(!checked.isEmpty()) sensorActivated = (Boolean) snapshot.child("fallSensor").child("checked").getValue();
+                        else sensorActivated=false;
+                    }
                     else sensorActivated=false;
-                }
-                else sensorActivated=false;
 
-                if(sensorActivated){
-                    startGravitySensor();
-                }
-                else{
-                    if(mSensorManager != null) {
-                        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null && mGravity != null) {
-                            mSensorManager.unregisterListener(FallingService.this, mGravity);
+                    if(sensorActivated){
+                        startGravitySensor();
+                    }
+                    else{
+                        if(mSensorManager != null) {
+                            if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null && mGravity != null) {
+                                mSensorManager.unregisterListener(FallingService.this, mGravity);
+                            }
                         }
                     }
+                }
+
+                if(snapshot.child("emergencyNumber").exists()){
+                    phoneNumber = snapshot.child("emergencyNumber").child("limit").getValue().toString();
                 }
 
             }
@@ -117,6 +124,8 @@ public class FallingService extends Service implements SensorEventListener {
                 Log.d("Sensor X",event.values[0]+ "m/s2");
                 Log.d("Sensor Y",event.values[1]+ "m/s2");
                 Log.d("Sensor Z",event.values[2]+ "m/s2");
+
+                sendBroadcast(new Intent("com.tfg.healthwatch.FALL_DETECTED").putExtra("emergencyNumber",phoneNumber));
             }
 
         }
