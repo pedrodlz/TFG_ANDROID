@@ -79,7 +79,7 @@ public class AlertsFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 Map newPost = new HashMap();
-                newPost.put("limit",0);
+                newPost.put("limit","");
                 newPost.put("checked",false);
 
                 if(snapshot.child("fallSensor").exists()){
@@ -170,7 +170,7 @@ public class AlertsFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                if(!phoneNumber.isEmpty()){
+                if(!phoneNumber.isEmpty() && Integer.parseInt(phoneNumber) != 0){
                     Intent callIntent = new Intent(Intent.ACTION_CALL);
                     callIntent.setData(Uri.parse("tel:"+phoneNumber));
 
@@ -179,6 +179,7 @@ public class AlertsFragment extends Fragment {
                         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CALL_PHONE}, 1);
                     }else startActivity(callIntent);
                 }
+                else Toast.makeText(getContext(),"El número de emergencia no puede estar vacío o ser 0",Toast.LENGTH_LONG).show();
             }
         });
 

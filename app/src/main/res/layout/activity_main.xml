@@ -24,22 +24,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <Button
-        android:id="@+id/go_to_login_btn"
-        android:layout_width="152dp"
-        android:layout_height="46dp"
-        android:layout_marginTop="32dp"
-        android:background="@drawable/button"
-        android:text="@string/action_sign_in"
-        android:textAllCaps="false"
-        app:iconTint="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/credits_copyright"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.162"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3"
-        app:layout_constraintVertical_bias="0.0" />
-
     <TextView
         android:id="@+id/credits_copyright"
         android:layout_width="wrap_content"

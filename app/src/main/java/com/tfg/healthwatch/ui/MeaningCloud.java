@@ -18,6 +18,7 @@ import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,6 +81,7 @@ public class MeaningCloud extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         language = Locale.getDefault().getLanguage();
 
@@ -97,6 +99,12 @@ public class MeaningCloud extends Fragment {
         });
 
         getMinMaxRates();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        requireActivity().getOnBackPressedDispatcher().onBackPressed();
+        return super.onOptionsItemSelected(item);
     }
 
     @SuppressLint("ClickableViewAccessibility")

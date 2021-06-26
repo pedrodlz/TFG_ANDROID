@@ -19,14 +19,14 @@
         <service
             android:name=".FallingService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
         <!--
                Set to true if your app is Standalone, that is, it does not require the handheld
                app to run.
         -->
         <activity
             android:name=".ui.login.SignUpActivity"
-            android:label="@string/title_activity_sign_up"></activity>
+            android:label="@string/title_activity_sign_up" />
         <activity android:name=".DashboardActivity">
             <intent-filter>
                 <action android:name="com.tfg.healtwatch.heartRate" />

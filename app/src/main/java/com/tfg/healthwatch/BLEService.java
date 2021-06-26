@@ -395,7 +395,6 @@ public class BLEService extends Service {
 
     public void readSteps(BluetoothGattCharacteristic characteristic){
 
-        Log.d(TAG,"readSteps");
         byte[] data = characteristic.getValue();
 
         if (data.length >= 13) {
@@ -415,7 +414,7 @@ public class BLEService extends Service {
 
             if(stepsLimit != null && stepsChecked){
                 if(steps >= Integer.parseInt(stepsLimit)){
-                    createNotification(R.drawable.ic_footprint_svgrepo_com,"Steps alert","You have reached your daily steps goal!",2);
+                    createNotification(R.drawable.ic_footprint_svgrepo_com,getString(R.string.steps_alert),getString(R.string.steps_alert_message)+stepsLimit+" "+getString(R.string.steps).toLowerCase()+"!",2);
                 }
             }
         }
@@ -620,7 +619,7 @@ public class BLEService extends Service {
                     if(emergencyNumber != null && emergencyChecked){
                         sendBroadcast(new Intent("com.tfg.healthwatch.EMERGENCY_CALL").putExtra("emergencyNumber",emergencyNumber));
                     }
-                    else createNotification(R.drawable.ic_heartbeat_svgrepo_com,"Heart Rate alert","Heart rate has gone above "+heartRateLimit,3);
+                    else createNotification(R.drawable.ic_heartbeat_svgrepo_com,getString(R.string.heart_rate_alert),getString(R.string.heart_rate_alert_message)+heartRateLimit,3);
                 }
             }
 
@@ -636,7 +635,7 @@ public class BLEService extends Service {
 
         if(batteryLimit != null && batteryChecked) {
             if (characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0) <= Integer.parseInt(batteryLimit)) {
-                createNotification(R.drawable.ic_low_battery_svgrepo_com,"Battery alert","Battery has gone under "+batteryLimit+"%",1);
+                createNotification(R.drawable.ic_low_battery_svgrepo_com,getString(R.string.battery_alert),getString(R.string.battery_alert_message)+batteryLimit+"%",1);
             }
         }
 

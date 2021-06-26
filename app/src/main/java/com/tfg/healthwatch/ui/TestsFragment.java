@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -135,6 +136,7 @@ public class TestsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (getArguments() != null) {
             mType = getArguments().getString(ARG_PARAM1);
             Log.d(TAG,"Selected type: "+ mType);
@@ -149,6 +151,12 @@ public class TestsFragment extends Fragment {
             responseData = FirebaseDatabase.getInstance().getReference().child("Responses").child(currentUser.getUid()).child(stringDate).child(mType);
 
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        requireActivity().getOnBackPressedDispatcher().onBackPressed();
+        return super.onOptionsItemSelected(item);
     }
 
     @SuppressLint("ClickableViewAccessibility")

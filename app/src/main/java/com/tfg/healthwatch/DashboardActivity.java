@@ -14,7 +14,7 @@ import androidx.navigation.ui.NavigationUI;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -79,7 +79,7 @@ public class DashboardActivity extends AppCompatActivity {
                     if(action.equals(emergencyIntent)) title = "High heart rate";
                     else if(action.equals(fallIntent)) title = "Fall detected";
 
-                    new AlertDialog.Builder(DashboardActivity.this )
+                    new AlertDialog.Builder(DashboardActivity.this ,R.style.AlertDialogCustom)
                             .setTitle(title)
                             .setMessage("Do you want to call your emergency number?")
                             .setPositiveButton( "Yes" , new
@@ -160,7 +160,6 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        unregisterReceiver(receiver);
         stopService(new Intent(this,BLEService.class));
         stopService(new Intent(this,FallingService.class));
     }
@@ -171,13 +170,13 @@ public class DashboardActivity extends AppCompatActivity {
                                            @NonNull int[] grantResults){
         super.onRequestPermissionsResult(requestCode,permissions,grantResults);
 
-        if (requestCode == RecordAudioRequestCode && grantResults.length > 0 ){
+        /*if (requestCode == RecordAudioRequestCode && grantResults.length > 0 ){
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 Toast.makeText(this,"Permission Granted",Toast.LENGTH_SHORT).show();
         }
         if (requestCode == CallRequestCode && grantResults.length > 0 ){
             if(grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 Toast.makeText(this,"Permission Granted",Toast.LENGTH_SHORT).show();
-        }
+        }*/
     }
 }

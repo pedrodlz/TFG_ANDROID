@@ -11,7 +11,6 @@
     <string name="action_sign_up">Crear cuenta</string>
     <string name="not_registered">¿No tiene una cuenta?</string>
     <string name="welcome">¡Bienvenido!</string>
-    <string name="heart_rate">Pulsaciones:</string>
     <string name="battery_level">Batería:</string>
     <string name="prompt_password">Contraseña</string>
     <string name="prompt_email">Email</string>
@@ -21,13 +20,13 @@
     <string name="title_goals">Objetivos</string>
     <string name="title_alerts">Alertas</string>
     <string name="fall_alert">Caídas</string>
-    <string name="steps_alert">Pasos</string>
-    <string name="heart_rate_alert">Pulsaciones</string>
-    <string name="battery_alert">Batería</string>
-    <string name="phone_alert">Numero Emergencia</string>
+    <string name="steps">Pasos</string>
+    <string name="heart_rate">Pulsaciones</string>
+    <string name="battery">Batería</string>
+    <string name="phone_alert">Número Emergencia</string>
     <string name="title_diagnose">Diagnóstico</string>
     <string name="goal_pick_list">Elige el tipo</string>
-    <string name="lose_weight">Perder peso</string>
+    <string name="lose_weight">Perder kilos</string>
     <string name="walk_kilometers">Andar kilometros</string>
     <string name="walk_steps">Andar pasos</string>
     <string name="burn_calories">Quemar calorías</string>
@@ -51,4 +50,10 @@
     <string name="habit_test">Test de hábitos</string>
     <string name="goal_test">Test de objetivos</string>
     <string name="free_test">Test libre</string>
+    <string name="steps_alert">Alerta de pasos</string>
+    <string name="heart_rate_alert">Alerta de pulsaciones</string>
+    <string name="battery_alert">Alerta de batería</string>
+    <string name="battery_alert_message">"Batería por debajo del "</string>
+    <string name="heart_rate_alert_message">"Pulsaciones por encima de "</string>
+    <string name="steps_alert_message">"Has andado "</string>
 </resources>

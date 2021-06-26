@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -40,9 +41,15 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setHasOptionsMenu(true);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         userTable = FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        requireActivity().getOnBackPressedDispatcher().onBackPressed();
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

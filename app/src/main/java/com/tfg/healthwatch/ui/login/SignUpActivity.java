@@ -29,13 +29,14 @@ import java.util.Map;
 public class SignUpActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private EditText emailEditText, passwordEditText, usernameEditText, genderEditText, birthdateEditText;
+    private EditText emailEditText, passwordEditText, usernameEditText;
     private Button signUpButton;
     private TextView errorText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_sign_up);
 
         // Initialize Firebase Auth
@@ -44,8 +45,6 @@ public class SignUpActivity extends AppCompatActivity {
         emailEditText = findViewById(R.id.sign_up_email);
         passwordEditText = findViewById(R.id.sign_up_password);
         usernameEditText = findViewById(R.id.username);
-        genderEditText = findViewById(R.id.gender);
-        birthdateEditText = findViewById(R.id.birthdate);
         signUpButton = findViewById(R.id.sign_up_button);
         errorText = findViewById(R.id.error_text_sign_up);
 
@@ -55,8 +54,6 @@ public class SignUpActivity extends AppCompatActivity {
                 String email = emailEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
                 String name = usernameEditText.getText().toString();
-                String gender = genderEditText.getText().toString();
-                String birthdate = birthdateEditText.getText().toString();
 
                 mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -70,8 +67,6 @@ public class SignUpActivity extends AppCompatActivity {
 
                             Map newPost = new HashMap();
                             newPost.put("name",name);
-                            newPost.put("birthDate",birthdate);
-                            newPost.put("gender",gender);
 
                             currentUserDB.setValue(newPost).addOnFailureListener(new OnFailureListener() {
                                 @Override

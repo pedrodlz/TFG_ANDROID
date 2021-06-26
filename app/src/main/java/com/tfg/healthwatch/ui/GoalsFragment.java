@@ -1,8 +1,10 @@
 package com.tfg.healthwatch.ui;
 
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
+
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -111,13 +113,13 @@ public class GoalsFragment extends Fragment {
             public void onClick(View v) {
                 String[] colors = getResources().getStringArray(R.array.goals_elements_list);
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(getResources().getString(R.string.goal_pick_list));
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext(),R.style.AlertDialogCustom);
+                //builder.setTitle(getResources().getString(R.string.goal_pick_list));
                 builder.setItems(colors, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        AlertDialog.Builder inputBuilder = new AlertDialog.Builder(getContext());
+                        AlertDialog.Builder inputBuilder = new AlertDialog.Builder(getContext(),R.style.AlertDialogCustom);
 
                         String option = colors[which];
                         final String[] m_Text = new String[1];
@@ -126,11 +128,13 @@ public class GoalsFragment extends Fragment {
                         Map initPost = new HashMap();
 
                         final EditText input = new EditText(getContext());
+                        input.setTextColor(getResources().getColor(R.color.custom_dark_grey));
+                        input.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.custom_light_grey)));
                         input.setInputType(InputType.TYPE_CLASS_TEXT);
                         inputBuilder.setView(input);
 
                         // Set up the buttons
-                        inputBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        inputBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 if(!option.equals(getString(R.string.custom))){
