@@ -121,9 +121,7 @@ public class FallingService extends Service implements SensorEventListener {
 
             if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
                 //Do your stuff
-                Log.d("Sensor X",event.values[0]+ "m/s2");
-                Log.d("Sensor Y",event.values[1]+ "m/s2");
-                Log.d("Sensor Z",event.values[2]+ "m/s2");
+                Log.e(TAG,"FALL_DETECTED");
 
                 sendBroadcast(new Intent("com.tfg.healthwatch.FALL_DETECTED").putExtra("emergencyNumber",phoneNumber));
             }

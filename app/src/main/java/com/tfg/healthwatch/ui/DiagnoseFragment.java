@@ -30,7 +30,7 @@ public class DiagnoseFragment extends Fragment {
     private ConstraintLayout energyButton, habitButton, goalButton, meaningButton;
     private ImageButton mVerySad, mSad, mNormal, mSmile,mHappy;
     private FirebaseUser currentUser;
-    private DatabaseReference feelingTable;
+    private DatabaseReference activityTable;
     private String stringDate;
 
     @Override
@@ -39,7 +39,7 @@ public class DiagnoseFragment extends Fragment {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         LocalDate date= LocalDate.now( ZoneOffset.UTC ) ;
         stringDate= "" + date.getDayOfMonth() + date.getMonthValue() + date.getYear();
-        feelingTable = FirebaseDatabase.getInstance().getReference().child("Feelings").child(currentUser.getUid()).child(stringDate);
+        activityTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid()).child(stringDate);
     }
 
     @Override
@@ -64,37 +64,31 @@ public class DiagnoseFragment extends Fragment {
 
         mVerySad.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                feelingTable.child("date").setValue(now);
-                feelingTable.child("generalFeeling").setValue("N+");
+            public void onClick(View v) { activityTable.child("generalFeeling").setValue(1);
             }
         });
         mSad.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                feelingTable.child("date").setValue(now);
-                feelingTable.child("generalFeeling").setValue("N");
+                activityTable.child("generalFeeling").setValue(2);
             }
         });
         mNormal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                feelingTable.child("date").setValue(now);
-                feelingTable.child("generalFeeling").setValue("NEU");
+                activityTable.child("generalFeeling").setValue(3);
             }
         });
         mSmile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                feelingTable.child("date").setValue(now);
-                feelingTable.child("generalFeeling").setValue("P");
+                activityTable.child("generalFeeling").setValue(4);
             }
         });
         mHappy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                feelingTable.child("date").setValue(now);
-                feelingTable.child("generalFeeling").setValue("P+");
+                activityTable.child("generalFeeling").setValue(5);
             }
         });
 
