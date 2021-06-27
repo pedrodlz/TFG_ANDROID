@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:backgroundTint="@color/accent"
-        android:text="Guardar"
+        android:text="@string/save"
         android:textColor="@color/forth"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

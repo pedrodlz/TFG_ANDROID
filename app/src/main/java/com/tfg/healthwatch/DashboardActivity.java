@@ -81,8 +81,8 @@ public class DashboardActivity extends AppCompatActivity {
 
                     new AlertDialog.Builder(DashboardActivity.this ,R.style.AlertDialogCustom)
                             .setTitle(title)
-                            .setMessage("Do you want to call your emergency number?")
-                            .setPositiveButton( "Yes" , new
+                            .setMessage(getString(R.string.question_call_emergency))
+                            .setPositiveButton( getString(R.string.yes) , new
                                     DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick (DialogInterface paramDialogInterface , int paramInt) {

@@ -1,7 +1,7 @@
 package com.tfg.healthwatch.ui;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
+import androidx.appcompat.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -121,8 +121,8 @@ public class TestsFragment extends Fragment {
                 finalResponse = low;
             }
 
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("Resultados");
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext(),R.style.AlertDialogCustom);
+            builder.setTitle(getString(R.string.results));
             builder.setMessage(finalResponse);
             builder.show();
         }

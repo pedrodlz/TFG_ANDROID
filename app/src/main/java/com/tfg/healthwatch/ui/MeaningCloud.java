@@ -156,7 +156,7 @@ public class MeaningCloud extends Fragment {
 
             @Override
             public void onBeginningOfSpeech() {
-                microphoneStatus.setText("Escuchando...");
+                microphoneStatus.setText(getString(R.string.listening)+"...");
             }
 
             @Override

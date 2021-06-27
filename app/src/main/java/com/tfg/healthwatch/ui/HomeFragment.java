@@ -105,22 +105,22 @@ public class HomeFragment extends Fragment {
                     String type;
                     switch((int) value){
                         case 5:
-                            type= "Muy feliz";
+                            type= getString(R.string.very_happy);
                             break;
                         case 4:
-                            type= "Contento";
+                            type= getString(R.string.happy);
                             break;
                         case 3:
-                            type= "Neutro";
+                            type= getString(R.string.neutral);
                             break;
                         case 2:
-                            type= "Triste";
+                            type= getString(R.string.sad);
                             break;
                         case 1:
-                            type= "Muy triste";
+                            type= getString(R.string.very_sad);
                             break;
                         default:
-                            type= "Sin datos";
+                            type= "error";
                             break;
                     }
                     return type;
@@ -161,22 +161,22 @@ public class HomeFragment extends Fragment {
                         int value = snapshot.child(stringDate).child("generalFeeling").getValue(int.class);
                         switch(value){
                             case 5:
-                                type= "Muy feliz";
+                                type= getString(R.string.very_happy);
                                 break;
                             case 4:
-                                type= "Contento";
+                                type= getString(R.string.happy);
                                 break;
                             case 3:
-                                type= "Neutro";
+                                type= getString(R.string.neutral);
                                 break;
                             case 2:
-                                type= "Triste";
+                                type= getString(R.string.sad);
                                 break;
                             case 1:
-                                type= "Muy triste";
+                                type= getString(R.string.very_sad);
                                 break;
                             default:
-                                type= "Sin datos";
+                                type= "error";
                                 break;
                         }
                         moodDisplay.setText(type);
@@ -227,7 +227,7 @@ public class HomeFragment extends Fragment {
                     heartGraph.addSeries(heartSeries);
                     heartGraph.getViewport().setScrollable(true); // enables horizontal scrolling
                     heartGraph.getViewport().setScalable(true);
-                    heartGraph.setTitle("Pulsaciones medias");
+                    heartGraph.setTitle(getString(R.string.average_heart_rate));
                     heartGraph.setTitleColor(R.color.custom_dark_grey);
                     heartGraph.getGridLabelRenderer().setGridColor(R.color.custom_dark_grey);
                     heartGraph.getGridLabelRenderer().setHorizontalLabelsColor(R.color.custom_dark_grey);
@@ -239,7 +239,7 @@ public class HomeFragment extends Fragment {
                     stepsGraph.addSeries(stepsSeries);
                     stepsGraph.getViewport().setScrollable(true); // enables horizontal scrolling
                     stepsGraph.getViewport().setScalable(true);
-                    stepsGraph.setTitle("Pasos diarios");
+                    stepsGraph.setTitle(getString(R.string.daily_steps));
                     stepsGraph.setTitleColor(R.color.custom_dark_grey);
                     stepsGraph.getGridLabelRenderer().setGridColor(R.color.custom_dark_grey);
                     stepsGraph.getGridLabelRenderer().setHorizontalLabelsColor(R.color.custom_dark_grey);
@@ -254,7 +254,7 @@ public class HomeFragment extends Fragment {
                     moodGraph.getViewport().setMaxY(5);
                     moodGraph.getViewport().setScrollable(true); // enables horizontal scrolling
                     moodGraph.getViewport().setScalable(true);
-                    moodGraph.setTitle("Sentimientos diarios");
+                    moodGraph.setTitle(getString(R.string.daily_mood));
                     moodGraph.setTitleColor(R.color.custom_dark_grey);
                     moodGraph.getGridLabelRenderer().setGridColor(R.color.custom_dark_grey);
                     moodGraph.getGridLabelRenderer().setHorizontalLabelsColor(R.color.custom_dark_grey);
@@ -284,7 +284,7 @@ public class HomeFragment extends Fragment {
             else if(action.equals(BATTERY_INTENT)){
                 String batteryLevel = intent.getStringExtra("batteryLevel");
                 ActionBar actionBar = ((AppCompatActivity) requireActivity()).getSupportActionBar();
-                actionBar.setTitle("Pulsera conectada " + batteryLevel + "%");
+                actionBar.setTitle(getString(R.string.connected_band)+" " + batteryLevel + "%");
                 Log.d("Battery level",batteryLevel + "%");
             }
         }

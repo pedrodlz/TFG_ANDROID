@@ -1,19 +1,8 @@
 package com.tfg.healthwatch.ui.bluetooth;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.le.ScanResult;
+
+import androidx.appcompat.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,15 +12,10 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,28 +25,17 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.Switch;
-import android.widget.TableLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import com.tfg.healthwatch.BLEService;
 import com.tfg.healthwatch.BluetoothListAdapter;
-import com.tfg.healthwatch.DashboardActivity;
-import com.tfg.healthwatch.FallingService;
 import com.tfg.healthwatch.R;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 public class BluetoothFragment extends Fragment{
 
@@ -133,17 +106,17 @@ public class BluetoothFragment extends Fragment{
             e.printStackTrace() ;
         }
         if (!gps_enabled && !network_enabled) {
-            new AlertDialog.Builder(getContext() )
+            new AlertDialog.Builder(getContext(),R.style.AlertDialogCustom )
                     .setTitle("GPS")
-                    .setMessage("Please, enable GPS in order to search for devices")
-                    .setPositiveButton( "Settings" , new
+                    .setMessage(getString(R.string.enable_gps))
+                    .setPositiveButton( getString(R.string.title_settings) , new
                             DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick (DialogInterface paramDialogInterface , int paramInt) {
                                     startActivity( new Intent(Settings. ACTION_LOCATION_SOURCE_SETTINGS )) ;
                                 }
                             })
-                    .setNegativeButton( "Cancel" , null )
+                    .setNegativeButton( "No" , null )
                     .show() ;
         }
     }
@@ -160,8 +133,8 @@ public class BluetoothFragment extends Fragment{
                 } else {
 
                     new AlertDialog.Builder(getContext())
-                        .setMessage("Accept location permissions in order to search for devices")
-                        .setTitle("Location permissions")
+                        .setMessage(getString(R.string.enable_gps))
+                        .setTitle("GPS")
                         .setPositiveButton("Ok", null)
                         .show();
                 }

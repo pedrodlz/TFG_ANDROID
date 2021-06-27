@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HealthWatch</string>
     <string name="title_home">Home</string>
     <string name="title_bluetooth">Bluetooth</string>
     <string name="title_settings">Ajustes</string>
@@ -57,4 +56,20 @@
     <string name="heart_rate_alert_message">"Pulsaciones por encima de "</string>
     <string name="steps_alert_message">"Has andado "</string>
     <string name="mood">Sentimiento de hoy</string>
+    <string name="enable_gps">Por favor, active el GPS para buscar dispositivos bluetooth</string>
+    <string name="results">Resultados</string>
+    <string name="very_happy">Muy feliz</string>
+    <string name="happy">Contento</string>
+    <string name="neutral">Neutro</string>
+    <string name="sad">Triste</string>
+    <string name="very_sad">Muy triste</string>
+    <string name="title_activity_sign_up">Crear cuenta</string>
+    <string name="average_heart_rate">Pulsaciones Medias</string>
+    <string name="daily_steps">Pasos Diarios</string>
+    <string name="daily_mood">Sentimientos Diarios</string>
+    <string name="connected_band">Pulsera conectada</string>
+    <string name="question_call_emergency">¿Quieres llamar a tu número de emergencia?</string>
+    <string name="yes">Si</string>
+    <string name="emergency_number_null">El número de emergencia no puede estar vacío o ser cero</string>
+    <string name="listening">Escuchando</string>
 </resources>

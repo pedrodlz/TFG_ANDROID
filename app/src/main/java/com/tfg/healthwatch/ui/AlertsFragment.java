@@ -179,7 +179,7 @@ public class AlertsFragment extends Fragment {
                         ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CALL_PHONE}, 1);
                     }else startActivity(callIntent);
                 }
-                else Toast.makeText(getContext(),"El número de emergencia no puede estar vacío o ser 0",Toast.LENGTH_LONG).show();
+                else Toast.makeText(getContext(),getString(R.string.emergency_number_null),Toast.LENGTH_LONG).show();
             }
         });
 

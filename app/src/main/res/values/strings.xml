@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HealthWatch</string>
+    <string name="app_name" translatable="false">HealthWatch</string>
     <string name="title_goals">Goals</string>
     <string name="title_alerts">Alerts</string>
     <string name="title_home">Home</string>
@@ -25,7 +25,7 @@
     <string name="login_failed">"Login failed"</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="google">Google</string>
+    <string name="google" translatable="false">Google</string>
     <string name="title_activity_sign_up">SignUpActivity</string>
     <string name="fall_alert">Falls</string>
     <string name="steps">Steps</string>
@@ -75,4 +75,19 @@
     <string name="heart_rate_alert_message">Heart rate has gone above</string>
     <string name="steps_alert_message">Reached daily steps goal of</string>
     <string name="mood">Today\'s mood</string>
+    <string name="enable_gps">Please, enable GPS in order to search for devices</string>
+    <string name="results">Results</string>
+    <string name="very_happy">Very happy</string>
+    <string name="happy">Happy</string>
+    <string name="neutral">Neutral</string>
+    <string name="sad">Sad</string>
+    <string name="very_sad">Very sad</string>
+    <string name="average_heart_rate">Average Heart Rate</string>
+    <string name="daily_steps">Daily Steps</string>
+    <string name="daily_mood">Daily Mood</string>
+    <string name="connected_band">Connected band</string>
+    <string name="question_call_emergency">Do you want to call your emergency number?</string>
+    <string name="yes">Yes</string>
+    <string name="emergency_number_null">Emergency number can\'t be null or zero</string>
+    <string name="listening">Listening</string>
 </resources>
