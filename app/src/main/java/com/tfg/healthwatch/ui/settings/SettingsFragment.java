@@ -1,5 +1,6 @@
 package com.tfg.healthwatch.ui.settings;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -27,13 +28,43 @@ import com.tfg.healthwatch.R;
 import com.tfg.healthwatch.ui.login.LoginActivity;
 
 import java.util.Locale;
+import java.util.Objects;
 
 public class SettingsFragment extends Fragment {
 
     private Button googleLogOut;
     private GoogleSignInClient mGoogleSignInClient;
+    private FirebaseAuth firebaseAuth;
     private ConstraintLayout profileButton, bluetoothButton, themeButton, languageButton, aboutButton;
 
+
+    FirebaseAuth.AuthStateListener authStateListener = new FirebaseAuth.AuthStateListener() {
+        @Override
+        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+            if (firebaseAuth.getCurrentUser() == null){
+                //Do anything here which needs to be done after signout is complete
+                signOutComplete();
+            }
+        }
+    };
+
+    private void signOutComplete() {
+        if(isAdded()){
+            Intent intent = new Intent(requireActivity(), LoginActivity.class);
+            startActivity(intent);
+            requireActivity().finish();
+        }
+
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requireActivity();
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuth.addAuthStateListener(authStateListener);
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -126,14 +157,16 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
                 mGoogleSignInClient = LoginActivity.getmGoogleSignInClient();
-                mGoogleSignInClient.signOut().addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Intent intent = new Intent(getActivity(), LoginActivity.class);
-                        startActivity(intent);
-                        getActivity().finish();
-                    }
-                });
+
+                if(mGoogleSignInClient != null){
+                    mGoogleSignInClient.signOut().addOnCompleteListener(requireActivity(), new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            signOutComplete();
+                        }
+                    });
+                }
+
             }
         });
 

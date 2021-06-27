@@ -64,30 +64,36 @@ public class DiagnoseFragment extends Fragment {
 
         mVerySad.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) { activityTable.child("generalFeeling").setValue(1);
+            public void onClick(View v) {
+                activityTable.child("date").setValue(now);
+                activityTable.child("generalFeeling").setValue(1);
             }
         });
         mSad.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                activityTable.child("date").setValue(now);
                 activityTable.child("generalFeeling").setValue(2);
             }
         });
         mNormal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                activityTable.child("date").setValue(now);
                 activityTable.child("generalFeeling").setValue(3);
             }
         });
         mSmile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                activityTable.child("date").setValue(now);
                 activityTable.child("generalFeeling").setValue(4);
             }
         });
         mHappy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                activityTable.child("date").setValue(now);
                 activityTable.child("generalFeeling").setValue(5);
             }
         });

@@ -162,8 +162,6 @@ public class GoalsFragment extends Fragment {
                         });
 
                         inputBuilder.show();
-
-
                     }
                 });
                 builder.show();

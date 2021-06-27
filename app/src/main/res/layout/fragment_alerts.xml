@@ -253,7 +253,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/sos_layout"
-        android:layout_width="194dp"
+        android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:layout_marginBottom="24dp"
         android:background="@drawable/sos_layout"
@@ -267,8 +267,8 @@
 
         <ImageView
             android:id="@+id/imageView5"
-            android:layout_width="37dp"
-            android:layout_height="37dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
             android:layout_marginStart="28dp"
             android:background="@drawable/ic_phone_svgrepo_com"
             android:backgroundTint="@color/forth"
@@ -279,11 +279,10 @@
 
         <TextView
             android:layout_width="wrap_content"
-            android:layout_height="30dp"
-            android:layout_marginStart="17dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:layout_marginEnd="40dp"
             android:fontFamily="@font/hind_bold"
-            android:paddingStart="15dp"
             android:text="S.O.S"
             android:textColor="@color/forth"
             android:textSize="25sp"

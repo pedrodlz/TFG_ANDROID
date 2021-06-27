@@ -48,8 +48,6 @@ public class GoalListAdapater extends RecyclerView.Adapter<GoalListAdapater.Goal
     @Override
     public void onBindViewHolder(@NonNull Goal holder, int position) {
         String showText = goalsList.get(position).text;
-        Log.d("Tipo ",goalsList.get(position).type);
-        Log.d("String ",context.getString(R.string.custom));
 
         if(!goalsList.get(position).type.equals("custom")){
             String[] text = goalsList.get(position).type.split(" ");

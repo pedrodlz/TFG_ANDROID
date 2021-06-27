@@ -55,42 +55,47 @@ public class SignUpActivity extends AppCompatActivity {
                 String password = passwordEditText.getText().toString();
                 String name = usernameEditText.getText().toString();
 
-                mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(!task.isSuccessful()){
-                            Toast.makeText(SignUpActivity.this,"Sign up error",Toast.LENGTH_SHORT).show();
-                        }
-                        else if(task.isSuccessful()){
-                            String userId = mAuth.getUid();
-                            DatabaseReference currentUserDB = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
+                if(!email.isEmpty() && !password.isEmpty()){
+                    mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(SignUpActivity.this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if(!task.isSuccessful()){
+                                Toast.makeText(SignUpActivity.this,"Sign up error",Toast.LENGTH_SHORT).show();
+                            }
+                            else if(task.isSuccessful()){
+                                String userId = mAuth.getUid();
+                                DatabaseReference currentUserDB = FirebaseDatabase.getInstance().getReference().child("Users").child(userId);
 
-                            Map newPost = new HashMap();
-                            newPost.put("name",name);
+                                Map newPost = new HashMap();
+                                newPost.put("name",name);
 
-                            currentUserDB.setValue(newPost).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.e("Error writing to database",e.getMessage());
-                                }
-                            }).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    Intent intent = new Intent(SignUpActivity.this, DashboardActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                            });
+                                currentUserDB.setValue(newPost).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.e("Error writing to database",e.getMessage());
+                                    }
+                                }).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Intent intent = new Intent(SignUpActivity.this, DashboardActivity.class);
+                                        startActivity(intent);
+                                        finish();
+                                    }
+                                });
+                            }
                         }
-                    }
-                    
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e("exception",e.getMessage());
-                        errorText.setText(e.getMessage());
-                    }
-                });
+
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.e("exception",e.getMessage());
+                            errorText.setText(e.getMessage());
+                        }
+                    });
+                }
+                else{
+                    errorText.setText("Email y contraseña no pueden estar vacíos");
+                }
             }
         });
     }
