@@ -72,4 +72,6 @@
     <string name="yes">Si</string>
     <string name="emergency_number_null">El número de emergencia no puede estar vacío o ser cero</string>
     <string name="listening">Escuchando</string>
+    <string name="fall_detected">Caída detectada</string>
+    <string name="high_heart_rate">Pulsaciones elevadas</string>
 </resources>

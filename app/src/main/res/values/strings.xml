@@ -90,4 +90,6 @@
     <string name="yes">Yes</string>
     <string name="emergency_number_null">Emergency number can\'t be null or zero</string>
     <string name="listening">Listening</string>
+    <string name="fall_detected">Fall detected</string>
+    <string name="high_heart_rate">High heart rarte</string>
 </resources>

@@ -61,6 +61,12 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+
+        IntentFilter params = new IntentFilter();
+        params.addAction(emergencyIntent);
+        params.addAction(fallIntent);
+        registerReceiver(receiver,params);
+
         // Bind to LocalService
         startService(new Intent(this,BLEService.class));
         startService(new Intent(this,FallingService.class));
@@ -76,8 +82,8 @@ public class DashboardActivity extends AppCompatActivity {
                         Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
                     firstAlert = false;
                     String title = "Emergency";
-                    if(action.equals(emergencyIntent)) title = "High heart rate";
-                    else if(action.equals(fallIntent)) title = "Fall detected";
+                    if(action.equals(emergencyIntent)) title = getString(R.string.high_heart_rate);
+                    else if(action.equals(fallIntent)) title = getString(R.string.fall_detected);
 
                     new AlertDialog.Builder(DashboardActivity.this ,R.style.AlertDialogCustom)
                             .setTitle(title)
