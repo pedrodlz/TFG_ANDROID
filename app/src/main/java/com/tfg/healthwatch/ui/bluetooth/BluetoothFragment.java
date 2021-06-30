@@ -172,7 +172,7 @@ public class BluetoothFragment extends Fragment{
     private void updateConnected(ArrayList<BluetoothObject> connected){
         connectedDevices = connected;
         connectedAdapter.clear();
-        connectedAdapter.addAll(connectedDevices);
+        if(connectedDevices != null) connectedAdapter.addAll(connectedDevices);
     }
 
 

@@ -227,6 +227,7 @@ public class HomeFragment extends Fragment {
                     heartGraph.addSeries(heartSeries);
                     heartGraph.getViewport().setScrollable(true); // enables horizontal scrolling
                     heartGraph.getViewport().setScalable(true);
+                    heartGraph.getViewport().setMinY(40);
                     heartGraph.setTitle(getString(R.string.average_heart_rate));
                     heartGraph.setTitleColor(R.color.custom_dark_grey);
                     heartGraph.getGridLabelRenderer().setGridColor(R.color.custom_dark_grey);
@@ -239,6 +240,7 @@ public class HomeFragment extends Fragment {
                     stepsGraph.addSeries(stepsSeries);
                     stepsGraph.getViewport().setScrollable(true); // enables horizontal scrolling
                     stepsGraph.getViewport().setScalable(true);
+                    stepsGraph.getViewport().setMinY(0);
                     stepsGraph.setTitle(getString(R.string.daily_steps));
                     stepsGraph.setTitleColor(R.color.custom_dark_grey);
                     stepsGraph.getGridLabelRenderer().setGridColor(R.color.custom_dark_grey);

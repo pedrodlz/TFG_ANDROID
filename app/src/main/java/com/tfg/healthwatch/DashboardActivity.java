@@ -138,26 +138,6 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        IntentFilter params = new IntentFilter();
-        params.addAction(emergencyIntent);
-        params.addAction(fallIntent);
-        registerReceiver(receiver,params);
-
-        startService(new Intent(this,BLEService.class));
-        startService(new Intent(this,FallingService.class));
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(receiver);
-        stopService(new Intent(this,BLEService.class));
-        stopService(new Intent(this,FallingService.class));
-    }
-
-    @Override
     public void onDestroy(){
         super.onDestroy();
         stopService(new Intent(this,BLEService.class));

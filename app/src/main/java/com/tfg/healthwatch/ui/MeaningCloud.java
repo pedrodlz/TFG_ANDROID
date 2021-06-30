@@ -72,6 +72,7 @@ public class MeaningCloud extends Fragment {
     private ArrayList<String> negative = new ArrayList<String>();
     private int maxRate=-1, minRate=-1, avgRate=-1;
     private TextToSpeech ttobj;
+    private String userName;
 
     public MeaningCloud() {
         // Required empty public constructor
@@ -95,6 +96,20 @@ public class MeaningCloud extends Fragment {
                 if(status != TextToSpeech.ERROR){
                     ttobj.setLanguage(Locale.getDefault());
                 }
+            }
+        });
+
+        FirebaseDatabase.getInstance().getReference().child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                if(snapshot.child("name").exists()){
+                    userName=snapshot.child("name").getValue().toString();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
             }
         });
 
@@ -332,7 +347,9 @@ public class MeaningCloud extends Fragment {
 
     private void buildResponseToUser(){
 
-        String response= "¡Hola! Según mi análisis puedo concluir que estás ";
+        String response= "¡Hola";
+        if(!userName.isEmpty()) response+= " " + userName;
+        response += "! Según mi análisis puedo concluir que estás ";
         boolean highRate = false;
         boolean lowRate = false;
 
