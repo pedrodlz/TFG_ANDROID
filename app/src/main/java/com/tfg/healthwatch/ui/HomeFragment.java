@@ -27,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -34,12 +35,15 @@ import com.jjoe64.graphview.series.PointsGraphSeries;
 
 import com.tfg.healthwatch.R;
 
+import java.text.DateFormat;
 import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
@@ -53,13 +57,17 @@ public class HomeFragment extends Fragment {
     static final String HEART_RATE_INTENT = "com.tfg.healthwatch.HEART_RATE";
     private static final String BATTERY_INTENT = "com.tfg.healthwatch.BATTERY_LEVEL";
 
-    static class element {
+    static class element implements Comparable<element> {
         String value;
-        String date;
+        Date date;
 
-        element(String v, String d){
+        element(String v, Date d){
             value = v;
             date = d;
+        }
+        @Override
+        public int compareTo(element o) {
+            return date.compareTo(o.date);
         }
     }
 
@@ -83,7 +91,7 @@ public class HomeFragment extends Fragment {
 
         activityTable = FirebaseDatabase.getInstance().getReference().child("Activity").child(currentUser.getUid());
 
-        DefaultLabelFormatter formatter = new DefaultLabelFormatter() {
+        DefaultLabelFormatter formatter = new DateAsXAxisLabelFormatter(getContext()) {
             @Override
             public String formatLabel(double value, boolean isValueX) {
                 if (isValueX) {
@@ -140,17 +148,38 @@ public class HomeFragment extends Fragment {
                     ArrayList<element> stepsPoints = new ArrayList<>();
                     ArrayList<element> moodPoints = new ArrayList<>();
 
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss'Z'");
+
                     for(DataSnapshot day : snapshot.getChildren()){
                         if(day.child("Average Heart Rate").exists() && day.child("date").exists()){
-                            heartPoints.add(new element(day.child("Average Heart Rate").getValue().toString(), day.child("date").getValue().toString()));
+                            try {
+                                String dateString = day.child("date").getValue().toString();
+                                heartPoints.add(new element(day.child("Average Heart Rate").getValue().toString(), dateFormat.parse(dateString)));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                         }
                         if(day.child("Steps").exists() && day.child("date").exists()){
-                            stepsPoints.add(new element(day.child("Steps").getValue().toString(), day.child("date").getValue().toString()));
+                            try {
+                                String dateString = day.child("date").getValue().toString();
+                                stepsPoints.add(new element(day.child("Steps").getValue().toString(), dateFormat.parse(dateString)));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                         }
                         if(day.child("generalFeeling").exists() && day.child("date").exists()){
-                            moodPoints.add(new element(day.child("generalFeeling").getValue().toString(), day.child("date").getValue().toString()));
+                            try {
+                                String dateString = day.child("date").getValue().toString();
+                                moodPoints.add(new element(day.child("generalFeeling").getValue().toString(), dateFormat.parse(dateString)));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
+
+                    Collections.sort(heartPoints);
+                    Collections.sort(stepsPoints);
+                    Collections.sort(moodPoints);
 
                     if(snapshot.child(stringDate).exists() && snapshot.child(stringDate).child("Steps").exists()){
                         stepsDisplay.setText(snapshot.child(stringDate).child("Steps").getValue().toString());
@@ -188,39 +217,24 @@ public class HomeFragment extends Fragment {
 
                     for (int i = 0; i < heartPoints.size(); i++) {
                         // add new DataPoint object to the array for each of your list entries
-                        String stringDate = heartPoints.get(i).date;
-                        try {
-                            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss'Z'").parse(stringDate);
-                            heartDataPoints[i] = new DataPoint(date, Double.parseDouble(heartPoints.get(i).value)); // not sure but I think the second argument should be of type double
-
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
+                        Date stringDate = heartPoints.get(i).date;
+                        heartDataPoints[i] = new DataPoint(stringDate, Double.parseDouble(heartPoints.get(i).value)); // not sure but I think the second argument should be of type double
                     }
 
                     for (int i = 0; i < stepsPoints.size(); i++) {
                         // add new DataPoint object to the array for each of your list entries
-                        String stringDate = stepsPoints.get(i).date;
-                        try {
-                            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss'Z'").parse(stringDate);
-                            stepsDataPoints[i] = new DataPoint(date, Double.parseDouble(stepsPoints.get(i).value)); // not sure but I think the second argument should be of type double
+                        Date stringDate = stepsPoints.get(i).date;
+                        stepsDataPoints[i] = new DataPoint(stringDate, Double.parseDouble(stepsPoints.get(i).value)); // not sure but I think the second argument should be of type double
 
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
                     }
 
                     for (int i = 0; i < moodPoints.size(); i++) {
                         // add new DataPoint object to the array for each of your list entries
-                        String stringDate = moodPoints.get(i).date;
-                        try {
-                            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:sss'Z'").parse(stringDate);
-                            moodDataPoints[i] = new DataPoint(date, Double.parseDouble(moodPoints.get(i).value)); // not sure but I think the second argument should be of type double
+                        Date stringDate = moodPoints.get(i).date;
+                        moodDataPoints[i] = new DataPoint(stringDate, Double.parseDouble(moodPoints.get(i).value)); // not sure but I think the second argument should be of type double
 
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
                     }
+
 
                     LineGraphSeries<DataPoint> heartSeries = new LineGraphSeries<DataPoint>(heartDataPoints);
                     heartSeries.setColor(ContextCompat.getColor(requireContext(),R.color.error));
