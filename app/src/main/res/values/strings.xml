@@ -73,7 +73,7 @@
     <string name="battery_alert">Battery alert</string>
     <string name="battery_alert_message">"Battery has gone under "</string>
     <string name="heart_rate_alert_message">Heart rate has gone above</string>
-    <string name="steps_alert_message">Reached daily steps goal of</string>
+    <string name="steps_alert_message">"Reached daily steps goal of "</string>
     <string name="mood">Today\'s mood</string>
     <string name="enable_gps">Please, enable GPS in order to search for devices</string>
     <string name="results">Results</string>

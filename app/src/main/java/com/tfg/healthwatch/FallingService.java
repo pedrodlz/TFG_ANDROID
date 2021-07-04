@@ -117,7 +117,14 @@ public class FallingService extends Service implements SensorEventListener {
                     + Math.pow(loZ, 2));
 
             DecimalFormat precision = new DecimalFormat("0,00");
-            double ldAccRound = Double.parseDouble(precision.format(loAccelerationReader));
+            double ldAccRound = 0;
+            try{
+                String formatted = precision.format(loAccelerationReader);
+                ldAccRound = Double.parseDouble(formatted);
+            }
+            catch (NumberFormatException e){
+                ldAccRound = loAccelerationReader/10;
+            }
 
             if (ldAccRound > 0.3d && ldAccRound < 0.5d) {
                 //Do your stuff

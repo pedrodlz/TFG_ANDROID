@@ -105,8 +105,10 @@ public class BLEService extends Service {
     private static final UUID BATTERY_LEVEL_UUID =
             UUID.fromString(String.format(BASE_UUID, "2a19"));
 
-    private static final UUID UUID_SERVICE_MIBAND_SERVICE = UUID.fromString(String.format(BASE_UUID, "FEE0"));
-    public static final UUID UUID_CHARACTERISTIC_REALTIME_STEPS = UUID.fromString("00000007-0000-3512-2118-0009af100700");
+    private static final UUID UUID_SERVICE_MIBAND_SERVICE =
+            UUID.fromString(String.format(BASE_UUID, "FEE0"));
+    public static final UUID UUID_CHARACTERISTIC_REALTIME_STEPS =
+            UUID.fromString("00000007-0000-3512-2118-0009af100700");
 
 
     public BLEService(){};
